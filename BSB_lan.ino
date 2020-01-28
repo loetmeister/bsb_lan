@@ -3261,7 +3261,8 @@ int set(int line      // the ProgNr of the heater parameter
     case VT_DATETIME:
       {
       // /S0=dd.mm.yyyy_mm:hh:ss
-      int d,m,y,min,hour,sec;
+      uint8_t d,m,min,hour,sec;
+      int y;
       // The caller MUST provide six values for an event
       if(6!=sscanf(val,"%d.%d.%d_%d:%d:%d",&d,&m,&y,&hour,&min,&sec)) {
         DebugOutput.println(F("Too few/many arguments for date/time!"));
@@ -3305,8 +3306,8 @@ int set(int line      // the ProgNr of the heater parameter
       //DISP->HEIZ SET  502 Zeitprogramm Heizkreis 1 -  Mi: 1. 05:00 - 22:00 2. --:-- - --:-- 3. --:-- - --:--
       //DC 8A 00 17 03 3D 05 0A 8E 05 00 16 00 80 00 00 00 80 00 00 00 08 98
       // Default values if not requested otherwise
-      int h1s=0x80,m1s=0x00,h2s=0x80,m2s=0x00,h3s=0x80,m3s=0x00;
-      int h1e=0x80,m1e=0x00,h2e=0x80,m2e=0x00,h3e=0x80,m3e=0x00;
+      uint8_t h1s=0x80,m1s=0x00,h2s=0x80,m2s=0x00,h3s=0x80,m3s=0x00;
+      uint8_t h1e=0x80,m1e=0x00,h2e=0x80,m2e=0x00,h3e=0x80,m3e=0x00;
       int ret;
       ret=sscanf(val,"%d:%d-%d:%d_%d:%d-%d:%d_%d:%d-%d:%d",&h1s,&m1s,&h1e,&m1e,&h2s,&m2s,&h2e,&m2e,&h3s,&m3s,&h3e,&m3e);
       // we need at least the first period
@@ -3344,7 +3345,7 @@ int set(int line      // the ProgNr of the heater parameter
       param[8]=0x17; //?
       param_len=9;
       if(val[0]!='\0'){
-          int d,m;
+          uint8_t d,m;
           if(2!=sscanf(val,"%d.%d.",&d,&m))
             return 0;      // incomplete input data
           param[0]=0x06;   // flag = enabled
@@ -3363,7 +3364,7 @@ int set(int line      // the ProgNr of the heater parameter
     // Bei Anzeige werden keine Werte abgefragt. Bei Änderung wird ein INF geschickt.
     // Sommerzeit Beginn 25.3. DISP->ALL  INF      0500009E 00 FF 03 19 FF FF FF FF 16
     // Sommerzeit Ende 25.11. DISP->ALL  INF      0500009D 00 FF 0B 19 FF FF FF FF 16
-      int d,m;
+      uint8_t d,m;
       if(2!=sscanf(val,"%d.%d",&d,&m))
         return 0;
       param[0]=0;
