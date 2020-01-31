@@ -313,6 +313,14 @@ const char U_LITERPERHOUR[] PROGMEM = UNIT_LITERPERHOUR_TEXT;
 const char U_LITERPERMIN[] PROGMEM = UNIT_LITERPERMIN_TEXT;
 const char U_NONE[] PROGMEM = "";
 
+const char MENU_TEXT_ER1[] PROGMEM = MENU_TEXT_ER1_TEXT;
+const char MENU_TEXT_ER2[] PROGMEM = MENU_TEXT_ER2_TEXT;
+const char MENU_TEXT_ER3[] PROGMEM = MENU_TEXT_ER3_TEXT;
+const char MENU_TEXT_ER4[] PROGMEM = MENU_TEXT_ER4_TEXT;
+const char MENU_TEXT_ER5[] PROGMEM = MENU_TEXT_ER5_TEXT;
+const char MENU_TEXT_ER6[] PROGMEM = MENU_TEXT_ER6_TEXT;
+const char MENU_TEXT_ER7[] PROGMEM = MENU_TEXT_ER7_TEXT;
+
 typedef struct {
   uint32_t    cmd;                 // the command or fieldID
   uint8_t     category;            // the menu category
