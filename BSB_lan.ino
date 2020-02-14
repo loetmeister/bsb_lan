@@ -3300,10 +3300,9 @@ int set(int line      // the ProgNr of the heater parameter
     case VT_DATETIME:
       {
       // /S0=dd.mm.yyyy_mm:hh:ss
-      uint8_t d,m,min,hour,sec;
-      int y;
+      unsigned int d,m,min,y,hour,sec;
       // The caller MUST provide six values for an event
-      if(6!=sscanf(val,"%d.%d.%d_%d:%d:%d",&d,&m,&y,&hour,&min,&sec)) {
+      if(6!=sscanf(val,"%u.%u.%u_%u:%u:%u",&d,&m,&y,&hour,&min,&sec)) {
         DebugOutput.println(F("Too few/many arguments for date/time!"));
         return 0;
       }
@@ -3345,10 +3344,10 @@ int set(int line      // the ProgNr of the heater parameter
       //DISP->HEIZ SET  502 Zeitprogramm Heizkreis 1 -  Mi: 1. 05:00 - 22:00 2. --:-- - --:-- 3. --:-- - --:--
       //DC 8A 00 17 03 3D 05 0A 8E 05 00 16 00 80 00 00 00 80 00 00 00 08 98
       // Default values if not requested otherwise
-      uint8_t h1s=0x80,m1s=0x00,h2s=0x80,m2s=0x00,h3s=0x80,m3s=0x00;
-      uint8_t h1e=0x80,m1e=0x00,h2e=0x80,m2e=0x00,h3e=0x80,m3e=0x00;
+      unsigned int h1s=0x80,m1s=0x00,h2s=0x80,m2s=0x00,h3s=0x80,m3s=0x00;
+      unsigned int h1e=0x80,m1e=0x00,h2e=0x80,m2e=0x00,h3e=0x80,m3e=0x00;
       int ret;
-      ret=sscanf(val,"%d:%d-%d:%d_%d:%d-%d:%d_%d:%d-%d:%d",&h1s,&m1s,&h1e,&m1e,&h2s,&m2s,&h2e,&m2e,&h3s,&m3s,&h3e,&m3e);
+      ret=sscanf(val,"%u:%u-%u:%u%u:%u-%u:%u%u:%u-%u:%u",&h1s,&m1s,&h1e,&m1e,&h2s,&m2s,&h2e,&m2e,&h3s,&m3s,&h3e,&m3e);
       // we need at least the first period
       if(ret<4)      // BEGIN hour/minute and END hour/minute
         return 0;
@@ -3384,8 +3383,8 @@ int set(int line      // the ProgNr of the heater parameter
       param[8]=0x17; //?
       param_len=9;
       if(val[0]!='\0'){
-          uint8_t d,m;
-          if(2!=sscanf(val,"%d.%d.",&d,&m))
+          unsigned int d,m;
+          if(2!=sscanf(val,"%u.%u.",&d,&m))
             return 0;      // incomplete input data
           param[0]=0x06;   // flag = enabled
           param[2]=m;
@@ -3403,8 +3402,8 @@ int set(int line      // the ProgNr of the heater parameter
     // Bei Anzeige werden keine Werte abgefragt. Bei Änderung wird ein INF geschickt.
     // Sommerzeit Beginn 25.3. DISP->ALL  INF      0500009E 00 FF 03 19 FF FF FF FF 16
     // Sommerzeit Ende 25.11. DISP->ALL  INF      0500009D 00 FF 0B 19 FF FF FF FF 16
-      uint8_t d,m;
-      if(2!=sscanf(val,"%d.%d",&d,&m))
+      unsigned int d,m;
+      if(2!=sscanf(val,"%u.%u",&d,&m))
         return 0;
       param[0]=0;
       param[1]=0xff;
@@ -4221,7 +4220,7 @@ void loop() {
   const byte MaxArrayElement=252;
   char  cLineBuffer[MaxArrayElement];  //
   byte  bPlaceInBuffer;                // index into buffer
-  uint16_t log_now = 0;
+  uint16_t log_now;
 
 #ifndef IPAddr 
 #ifndef WIFI
