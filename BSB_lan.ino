@@ -3300,7 +3300,7 @@ int set(int line      // the ProgNr of the heater parameter
     case VT_DATETIME:
       {
       // /S0=dd.mm.yyyy_mm:hh:ss
-      unsigned int d,m,min,y,hour,sec;
+      unsigned int d,m,y,min,hour,sec;
       // The caller MUST provide six values for an event
       if(6!=sscanf(val,"%u.%u.%u_%u:%u:%u",&d,&m,&y,&hour,&min,&sec)) {
         DebugOutput.println(F("Too few/many arguments for date/time!"));
@@ -3347,7 +3347,7 @@ int set(int line      // the ProgNr of the heater parameter
       unsigned int h1s=0x80,m1s=0x00,h2s=0x80,m2s=0x00,h3s=0x80,m3s=0x00;
       unsigned int h1e=0x80,m1e=0x00,h2e=0x80,m2e=0x00,h3e=0x80,m3e=0x00;
       int ret;
-      ret=sscanf(val,"%u:%u-%u:%u%u:%u-%u:%u%u:%u-%u:%u",&h1s,&m1s,&h1e,&m1e,&h2s,&m2s,&h2e,&m2e,&h3s,&m3s,&h3e,&m3e);
+      ret=sscanf(val,"%u:%u-%u:%u_%u:%u-%u:%u_%u:%u-%u:%u",&h1s,&m1s,&h1e,&m1e,&h2s,&m2s,&h2e,&m2e,&h3s,&m3s,&h3e,&m3e);
       // we need at least the first period
       if(ret<4)      // BEGIN hour/minute and END hour/minute
         return 0;
@@ -5000,11 +5000,11 @@ ich mir da nicht)
           monitor=atoi(p);    // .. to convert
           webPrintHeader();
           if(monitor>0){
-            client.println(F(MENU_TEXT_SR1));
+             clientPPrint(MENU_SR1);//client.println(F(MENU_TEXT_SR1));
           }else{
-            client.println(F(MENU_TEXT_SR2));
+            clientPPrint(MENU_SR2);//client.println(F(MENU_TEXT_SR2));
           }
-      	  client.println(F(MENU_TEXT_SR3));
+      	  clientPPrint(MENU_SR3);//client.println(F(MENU_TEXT_SR3));
           webPrintFooter();
           break;
         }
@@ -5026,7 +5026,7 @@ ich mir da nicht)
           p+=2;               // third position in cLineBuffer
           if(!isdigit(*p)){   // now we check for digits - nice
             webPrintHeader();
-            clientPPrint(MENU_TEXT_ER1);//client.println(F(MENU_TEXT_ER1));
+            clientPPrint(MENU_TEXTPGM_ER1);//client.println(F(MENU_TEXT_ER1));
             webPrintFooter();
             break;
           }
@@ -5034,7 +5034,7 @@ ich mir da nicht)
           p=strchr(p,'=');    // search for '=' sign
           if(p==NULL){        // no match
             webPrintHeader();
-            clientPPrint(MENU_TEXT_ER2);//client.println(F(MENU_TEXT_ER2));
+            clientPPrint(MENU_TEXTPGM_ER2);//client.println(F(MENU_TEXT_ER2));
             webPrintFooter();
             break;
           }
@@ -5059,9 +5059,9 @@ ich mir da nicht)
 
           if(setresult!=1){
             webPrintHeader();
-            clientPPrint(MENU_TEXT_ER3);//client.println(F(MENU_TEXT_ER3));
+            clientPPrint(MENU_TEXTPGM_ER3);//client.println(F(MENU_TEXT_ER3));
             if (setresult == 2) {
-              client.println(F(" - "));clientPPrint(MENU_TEXT_ER4);//client.println(F(" - " MENU_TEXT_ER4));
+              client.println(F(" - " MENU_TEXT_ER4));
             }
             webPrintFooter();
             break;
@@ -5170,10 +5170,10 @@ ich mir da nicht)
               }
             
             }else{
-              clientPPrint(MENU_TEXT_ER5);//client.println(F(MENU_TEXT_ER5));
+              clientPPrint(MENU_TEXTPGM_ER5);//client.println(F(MENU_TEXT_ER5));
             }
           }else{
-            clientPPrint(MENU_TEXT_ER6);//client.println(F(MENU_TEXT_ER6));
+            clientPPrint(MENU_TEXTPGM_ER6);//client.println(F(MENU_TEXT_ER6));
           }
           webPrintFooter();
           break;
@@ -5185,11 +5185,11 @@ ich mir da nicht)
           int line = atoi(&p[2]);
           int i=findLine(line,0,&c);
           if(i<0){
-            clientPPrint(MENU_TEXT_ER6);//client.println(F(MENU_TEXT_ER6));
+            clientPPrint(MENU_TEXTPGM_ER6);//client.println(F(MENU_TEXT_ER6));
           }else{
             if(!bus.Send(TYPE_QRV, c, msg, tx_msg)){
               DebugOutput.println(F("set failed"));  // to PC hardware serial I/F
-              clientPPrint(MENU_TEXT_ER3);//client.println(F(MENU_TEXT_ER3));
+              clientPPrint(MENU_TEXTPGM_ER3);//client.println(F(MENU_TEXT_ER3));
             }else{
 
               // Decode the xmit telegram and send it to the PC serial interface
@@ -5218,7 +5218,7 @@ ich mir da nicht)
         if(p[1]=='Q') {
           webPrintHeader();
 
-          client.print(F(MENU_TEXT_VER ": "));
+          clientPPrintBR(MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
           clientPPrint(BSB_VERSION);//client.print(F(BSB_VERSION));
           clientPPrint(br_html);//client.println(F("<br>"));
           client.print(F(MENU_TEXT_QSC "...<BR>"));
@@ -5805,12 +5805,12 @@ ich mir da nicht)
 #endif
         if (p[1]=='C'){ // dump configuration
           webPrintHeader();
-          client.println(F(MENU_TEXT_CFG "<BR><BR>"));
+          client.println(F(MENU_TEXT_CFG "<BR>"));
 //          client.println(F("BSB pins: "));
 //          client.println(bus);
 //          client.println(F("<BR><BR>"));
 
-          client.print(F(MENU_TEXT_VER ": "));
+          clientPPrintBR(MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
           clientPPrint(BSB_VERSION);//client.print(F(BSB_VERSION));
           clientPPrint(br_html);//client.println(F("<br>"));
           client.print(F(MENU_TEXT_RAM ": "));
@@ -6273,7 +6273,7 @@ ich mir da nicht)
             bool error = false;
             p=range+1;
             if(!isdigit(*p)){   // now we check for digits
-              clientPPrint(MENU_TEXT_ER1);//client.println(F(MENU_TEXT_ER1));
+              clientPPrint(MENU_TEXTPGM_ER1);//client.println(F(MENU_TEXT_ER1));
               break;
             }
             pin=(uint8_t)atoi(p);       // convert until non-digit char is found
@@ -6284,7 +6284,7 @@ ich mir da nicht)
               }
             }
             if (error==true) {
-              clientPPrint(MENU_TEXT_ER7);//client.println(F(MENU_TEXT_ER7));
+              clientPPrint(MENU_TEXTPGM_ER7);//client.println(F(MENU_TEXT_ER7));
               break;
             }
 
