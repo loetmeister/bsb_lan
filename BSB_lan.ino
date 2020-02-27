@@ -2447,6 +2447,45 @@ char *printTelegram(byte* msg, int query_line) {
   return pvalstr;
 }
 
+/** *****************************************************************
+ *  Function: bufferedprint and bufferedprintln
+ *  Does: do buffered print to network client. Increasing net perfomance 2~50 times
+ *  Pass parameters:
+ *  WiFiEspClient/EthernetClient &cl
+ *  PGM_P outstr
+ * Parameters passed back:
+ *   none
+ * Function value returned:
+ *   none
+ * Global resources used:
+ *   buffer variable
+ * *************************************************************** */
+#ifdef WIFI
+void bufferedprint(WiFiEspClient& cl, PGM_P outstr) {
+#else
+void bufferedprint(EthernetClient& cl, PGM_P outstr) {
+#endif
+  strncpy_P(buffer, outstr, BUFLEN);
+  buffer[BUFLEN - 1] = 0;
+  cl.print(buffer);
+}
+
+#ifdef WIFI
+void bufferedprintln(WiFiEspClient& cl, PGM_P outstr) {
+#else
+void bufferedprintln(EthernetClient& cl, PGM_P outstr) {
+#endif
+  strncpy_P(buffer, outstr, BUFLEN - 2);
+  strcat_P(buffer, PSTR("\n"));
+  buffer[BUFLEN - 1] = 0;
+  cl.print(buffer);
+}
+
+/** *****************************************************************
+ *  Function: printPStr
+ *  
+ *  TODO: add description
+ */
 void printPStr(uint_farptr_t outstr, uint16_t outstr_len) {
   int htmlbuflen = 100;
   byte htmllineBuf[htmlbuflen];
@@ -2487,62 +2526,54 @@ void webPrintHeader(void){
   client.print(PASSKEY);
   client.print(F("/"));
 #endif
-  client.println(F("'>BSB-LAN Web</A></h1></center>"));
-  client.print(F("<table width=80% align=center><tr bgcolor=#f0f0f0><td width=20% align=center><a href='/"));
+  bufferedprint(client, PSTR("'>BSB-LAN Web</A></h1></center><table width=80% align=center><tr bgcolor=#f0f0f0><td width=20% align=center><a href='/"));
+  
 #ifdef PASSKEY
   client.print(PASSKEY);
   client.print(F("/"));
 #endif
-  client.print(F("K'>" MENU_TEXT_HFK));
-
-  client.print(F("</a></td><td width=20% align=center>"));
-
-  client.print(F("<a href='/"));
+  bufferedprint(client, PSTR("K'>" MENU_TEXT_HFK "</a></td><td width=20% align=center><a href='/"));
+  //bufferedprint(client, PSTR("<td width=20% align=center><a href='/"));
+  
 #ifdef PASSKEY
   client.print(PASSKEY);
   client.print(F("/"));
 #endif
-  client.print(F("T'>" MENU_TEXT_SNS "</a>"));
-
-  client.print(F("</td><td width=20% align=center>"));
+  bufferedprint(client, PSTR("T'>" MENU_TEXT_SNS "</a></td><td width=20% align=center>"));
+  //bufferedprint(client, PSTR("<td width=20% align=center>"));
 
 #ifndef LOGGER
-  client.print(F("<font color=#000000>" MENU_TEXT_DLG "</font>"));
+  bufferedprint(client, PSTR("<font color=#000000>" MENU_TEXT_DLG "</font>"));
 #else
-  client.print(F("<a href='/"));
+  bufferedprint(client, PSTR("<a href='/"));
+  
 #ifdef PASSKEY
   client.print(PASSKEY);
   client.print(F("/"));
 #endif
-  client.print(F("DG'>" MENU_TEXT_SLG "</a>"));
+  bufferedprint(client, PSTR("DG'>" MENU_TEXT_SLG "</a>"));
 #endif
 
-  client.print(F("</td><td width=20% align=center>"));
+  bufferedprint(client, PSTR("</td><td width=20% align=center><a href='/"));
 
-  client.print(F("<a href='/"));
 #ifdef PASSKEY
   client.print(PASSKEY);
   client.print(F("/"));
 #endif
-  client.print(F("Q'>" MENU_TEXT_CHK "</a>"));
+  bufferedprint(client, PSTR("Q'>" MENU_TEXT_CHK "</a>"));
 
-  clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
-  client.print(F("<tr bgcolor=#f0f0f0><td width=20% align=center>"));
-
-  client.print(F("<a href='/"));
+  bufferedprint(client, td_tr_close_html);//  bufferedprint(client, PSTR("</td></tr>"));
+  bufferedprint(client, PSTR("<tr bgcolor=#f0f0f0><td width=20% align=center><a href='/"));
+  
 #ifdef PASSKEY
   client.print(PASSKEY);
   client.print(F("/"));
 #endif
-  client.print(F("C'>" MENU_TEXT_CFG));
-
-//  client.print(F("</a></td><td width=20% align=center><a href='http://github.com/fredlcore/bsb_lan/blob/master/command_ref/command_ref_" str(LANG) ".md'>" MENU_TEXT_URL));
-  client.print(F("</a></td><td width=20% align=center><a href='" MENU_LINK_URL "' target='_new'>" MENU_TEXT_URL));
-  client.print(F("</a></td><td width=20% align=center>"));
-
-  client.print(F("<a href='" MENU_LINK_TOC "' target='new'>" MENU_TEXT_TOC "</a></td><td width=20% align=center><a href='" MENU_LINK_FAQ "' target='_new'>" MENU_TEXT_FAQ "</a></td>"));
-//  client.println(F("<td width=20% align=center><a href='http://github.com/fredlcore/bsb_lan' target='new'>GitHub Repo</a></td>"));
-  client.println(F("</tr></table><p></p><table align=center width=80%><tr><td>"));
+  bufferedprint(client, PSTR("C'>" MENU_TEXT_CFG "</a></td>"));
+  bufferedprint(client, PSTR("<td width=20% align=center><a href='" MENU_LINK_URL "' target='_new'>" MENU_TEXT_URL "</a></td>"));
+  bufferedprint(client, PSTR("<td width=20% align=center><a href='" MENU_LINK_TOC "' target='new'>" MENU_TEXT_TOC "</a></td>"));
+  bufferedprint(client, PSTR("<td width=20% align=center><a href='" MENU_LINK_FAQ "' target='_new'>" MENU_TEXT_FAQ "</a></td>"));
+  bufferedprint(client, PSTR("</tr></table><p></p><table align=center width=80%><tr><td>\n"));
 
 } // --- webPrintHeader() ---
 
@@ -2559,11 +2590,7 @@ void webPrintHeader(void){
  *   client object
  * *************************************************************** */
 void webPrintFooter(void){
-  client.println(F("</td></tr></table>"));
-  client.println(F("</body>"));
-  client.println(F("</html>"));
-  client.println();
-
+  bufferedprint(client, PSTR("</td></tr></table>\n</body>\n</html>\n\n"));
 } // --- webPrintFooter() ---
 
 /** *****************************************************************
@@ -2581,12 +2608,11 @@ void webPrintFooter(void){
 void webPrintSite() {
   webPrintHeader();
 
-  //client.println(F("<p>"));
-  client.print(F("<p>BSB-LAN Web, Version "));
-  clientPPrint(BSB_VERSION);//client.print(F(BSB_VERSION));
-  client.println(F("<p><b>" MENU_TEXT_HFK ":</b> " MENU_DESC_HFK));
-  client.println(F("<p><b>" MENU_TEXT_CFG ":</b> " MENU_DESC_CFG));
-  client.println(F("<p><b>" MENU_TEXT_URL ":</b> " MENU_DESC_URL));
+  bufferedprint(client, PSTR("<p>BSB-LAN Web, Version "));
+  bufferedprint(client, BSB_VERSION);
+  bufferedprint(client, PSTR("<p><b>" MENU_TEXT_HFK ":</b> " MENU_DESC_HFK));
+  bufferedprint(client, PSTR("<p><b>" MENU_TEXT_CFG ":</b> " MENU_DESC_CFG));
+  bufferedprint(client, PSTR("<p><b>" MENU_TEXT_URL ":</b> " MENU_DESC_URL));
 
 #ifdef VERSION_CHECK
   client.println(F("<BR><BR>" MENU_TEXT_NVS "...<BR>"));
@@ -3645,9 +3671,11 @@ char* query(int line_start  // begin at this line (ProgNr)
 #ifdef HIDE_UNKNOWN
           continue;
 #endif
-          client.println(F("<tr style='color: #7f7f7f'><td>"));
+          //client.println(F("<tr style='color: #7f7f7f'><td>"));
+          bufferedprint(client, PSTR("<tr style='color: #7f7f7f'><td>"));
         } else {
-          client.println(F("<tr><td>"));
+          //client.println(F("<tr><td>"));
+          bufferedprint(client, PSTR("<tr><td>"));
         }
         client.println(outBuf);
 
@@ -3791,7 +3819,7 @@ char* query(int line_start  // begin at this line (ProgNr)
             }
           }
         }
-        clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
+        bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
       }
     } // endif, outBufLen > 0
   } // endfor, for each valid line (ProgNr) command within selected range
@@ -4028,9 +4056,7 @@ char *lookup_descr(uint16_t line) {
  *    led0   output pin 3
  * *************************************************************** */
 void Ipwe() {
-  client.println(F("HTTP/1.1 200 OK"));
-  client.println(F("Content-Type: text/html; charset=utf-8"));
-  client.println();
+  bufferedprint(client, PSTR("HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\n\n"));
 
   int i;
   int counter = 0;
@@ -4042,31 +4068,30 @@ void Ipwe() {
     ipwe_sensors[i] = strtod(query(ipwe_parameters[i],ipwe_parameters[i],1),NULL);
   }
 
-  client.print(F("<html><body><form><table border=1><tbody><tr><td>Sensortyp</td><td>Adresse</td><td>Beschreibung</td><td>Temperatur</td><td>Luftfeuchtigkeit</td><td>Windgeschwindigkeit</td><td>Regenmenge</td></tr>"));
+  bufferedprint(client, PSTR("<html><body><form><table border=1><tbody><tr><td>Sensortyp</td><td>Adresse</td><td>Beschreibung</td><td>Temperatur</td><td>Luftfeuchtigkeit</td><td>Windgeschwindigkeit</td><td>Regenmenge</td></tr>"));
   for (i=0; i < numIPWESensors; i++) {
     counter++;
-    client.print(F("<tr><td>T<br></td><td>"));
+    bufferedprint(client, PSTR("<tr><td>T<br></td><td>"));
     client.print(counter);
-    client.print(F("<br></td><td>"));
+    bufferedprint(client, PSTR("<br></td><td>"));
     client.print(lookup_descr(ipwe_parameters[i]));
-    client.print(F("<br></td><td>"));
+    bufferedprint(client, PSTR("<br></td><td>"));
     client.print(ipwe_sensors[i]);
-    client.print(F("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
+    bufferedprint(client, PSTR("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
   }
 
   for (int i=0; i<numAverages; i++) {
     if (avg_parameters[i] > 0) {
       counter++;
-      client.print(F("<tr><td>T<br></td><td>"));
+      bufferedprint(client, PSTR("<tr><td>T<br></td><td>"));
       client.print(counter);
-      client.print(F("<br></td><td>"));
-      client.print(F("Avg"));
+      bufferedprint(client, PSTR("<br></td><td>Avg"));
       client.print(lookup_descr(avg_parameters[i]));            
-      client.print(F("<br></td><td>"));
+      bufferedprint(client, PSTR("<br></td><td>"));
       float rounded = round(avgValues[i]*10);
       client.println(rounded/10);
 // TODO: extract and display unit text from cmdtbl.type
-      client.print(F("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
+      bufferedprint(client, PSTR("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
     }
   }
 
@@ -4081,13 +4106,13 @@ void Ipwe() {
     sensors.getAddress(device_address, i);
     sprintf(device_ascii, "%02x%02x%02x%02x%02x%02x%02x%02x",device_address[0],device_address[1],device_address[2],device_address[3],device_address[4],device_address[5],device_address[6],device_address[7]);
 
-    client.print(F("<tr><td>T<br></td><td>"));
+    bufferedprint(client, PSTR("<tr><td>T<br></td><td>"));
     client.print(counter);
-    client.print(F("<br></td><td>"));
+    bufferedprint(client, PSTR("<br></td><td>"));
     client.print(device_ascii);
-    client.print(F("<br></td><td>"));
+    bufferedprint(client, PSTR("<br></td><td>"));
     client.print(t);
-    client.print(F("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
+    bufferedprint(client, PSTR("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
   }
 #endif
 
@@ -4195,7 +4220,6 @@ uint16_t setPPS(uint8_t pps_index, uint16_t value) {
   }
   return log_parameter;
 }
-
 
 /** *****************************************************************
  *  Function:
@@ -4933,9 +4957,7 @@ ich mir da nicht)
 // IPWE END
 
         if (urlString == "/favicon.ico") {
-          client.println(F("HTTP/1.1 200 OK"));
-          client.println(F("Content-Type: image/x-icon"));
-          client.println();
+          bufferedprint(client, PSTR("HTTP/1.1 200 OK\nContent-Type: image/x-icon\n\n"));
 #if defined(__SAM3X8E__)
           printPStr(favicon, sizeof(favicon));
 #else
@@ -4983,11 +5005,11 @@ ich mir da nicht)
           verbose=atoi(p);
           webPrintHeader();
           if(verbose>0){
-            client.println(F(MENU_TEXT_VB1 "<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_VB1 "<BR>"));
           }else{
-            client.println(F(MENU_TEXT_VB2 "<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_VB2 "<BR>"));
           }
-          client.println(F(MENU_TEXT_VB3));
+          bufferedprint(client, PSTR("\n" MENU_TEXT_VB3));
           webPrintFooter();
           break;
         }
@@ -4997,11 +5019,11 @@ ich mir da nicht)
           monitor=atoi(p);    // .. to convert
           webPrintHeader();
           if(monitor>0){
-             clientPPrint(MENU_SR1);//client.println(F(MENU_TEXT_SR1));
+             bufferedprint(client, PSTR(MENU_TEXT_SR1));//client.println(F(MENU_TEXT_SR1));
           }else{
-            clientPPrint(MENU_SR2);//client.println(F(MENU_TEXT_SR2));
+            bufferedprint(client, PSTR(MENU_TEXT_SR2));//client.println(F(MENU_TEXT_SR2));
           }
-      	  clientPPrint(MENU_SR3);//client.println(F(MENU_TEXT_SR3));
+      	  bufferedprint(client, PSTR(MENU_TEXT_SR3));//client.println(F(MENU_TEXT_SR3));
           webPrintFooter();
           break;
         }
@@ -5023,7 +5045,7 @@ ich mir da nicht)
           p+=2;               // third position in cLineBuffer
           if(!isdigit(*p)){   // now we check for digits - nice
             webPrintHeader();
-            clientPPrint(MENU_TEXTPGM_ER1);//client.println(F(MENU_TEXT_ER1));
+            bufferedprint(client, MENU_TEXTPGM_ER1);
             webPrintFooter();
             break;
           }
@@ -5031,7 +5053,7 @@ ich mir da nicht)
           p=strchr(p,'=');    // search for '=' sign
           if(p==NULL){        // no match
             webPrintHeader();
-            clientPPrint(MENU_TEXTPGM_ER2);//client.println(F(MENU_TEXT_ER2));
+            bufferedprint(client, PSTR(MENU_TEXT_ER2));//client.println(F(MENU_TEXT_ER2));
             webPrintFooter();
             break;
           }
@@ -5056,9 +5078,9 @@ ich mir da nicht)
 
           if(setresult!=1){
             webPrintHeader();
-            clientPPrint(MENU_TEXTPGM_ER3);//client.println(F(MENU_TEXT_ER3));
+             bufferedprint(client, MENU_TEXTPGM_ER3);//client.println(F(MENU_TEXT_ER3));
             if (setresult == 2) {
-              client.println(F(" - " MENU_TEXT_ER4));
+              bufferedprint(client, PSTR(" - " MENU_TEXT_ER4));
             }
             webPrintFooter();
             break;
@@ -5085,19 +5107,23 @@ ich mir da nicht)
 //          memcpy_PF(buffer, pgm_get_far_address(ENUM_CAT), len);
 //          memcpy_P(buffer, &ENUM_CAT,len);
 //          buffer[len]=0;
-          client.print(F("<table><tr><td><a href='/"));
+          bufferedprint(client, PSTR("<table><tr><td><a href='/"));
           #ifdef PASSKEY
             client.print(PASSKEY);
             client.print(F("/"));
           #endif
-          client.println(F("B'>" MENU_TEXT_BST "</A><BR></td><td></td></tr>"));
-          client.print(F("<tr><td><a href='/"));
+          bufferedprint(client, PSTR("B'>" MENU_TEXT_BST "</A><BR></td><td></td></tr>\n<tr><td><a href='/"));
+          //bufferedprint(client, PSTR("<tr><td><a href='/"));
           #ifdef PASSKEY
             client.print(PASSKEY);
             client.print(F("/"));
           #endif
-          client.println(F("A'>" MENU_TEXT_24A "</A></td><td></td></tr>"));
-          client.println(F("<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"));
+          bufferedprint(client, PSTR("A'>" MENU_TEXT_24A "</a></td><td></td></tr>"));
+          bufferedprint(client, PSTR("<tr><td>&nbsp;</td><td>&nbsp;</td></tr>\n"));
+    #define K_FORMAT_TBL "<tr><td><a href='K%u'>%s</a></td><td>"
+    //TODO: add CAT_NR to formatbuf. "...%u - %u</td></tr>\n"
+    char *formatbuf = (char *)malloc(sizeof(K_FORMAT_TBL)+1);
+    strcpy_P(formatbuf, PSTR(K_FORMAT_TBL));
           for(int cat=0;cat<CAT_UNKNOWN;cat++){
             outBufclear();
             if ((bus.getBusType() != BUS_PPS) || (bus.getBusType() == BUS_PPS && cat == CAT_PPS)) {
@@ -5107,26 +5133,36 @@ ich mir da nicht)
               printENUM(pgm_get_far_address(ENUM_CAT),len,cat,1);
 #endif
               DebugOutput.println();
-              client.print(F("<tr><td><A HREF='K"));
-              client.print(cat);
-              client.print(F("'>"));
-              client.print(outBuf);
-              client.println(F("</A></td><td>"));
+              //bufferedprint(client, PSTR("<tr><td><A HREF='K"));
+              //client.print(cat);
+              //bufferedprint(client, PSTR("'>"));
+              //client.print(outBuf);
+              //bufferedprint(client, PSTR("</A></td><td>\n"));
+     sprintf(buffer, formatbuf, cat, outBuf);
+     client.print(buffer);
 #if defined(__SAM3X8E__)
               client.print(ENUM_CAT_NR[cat*2]);
 #else
               client.print(pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0])));
+              //???/strcat_P(buffer, pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0])));
 #endif
-              client.print(F(" - "));
+              bufferedprint(client, PSTR(" - "));
+    //strcat_P(buffer, PSTR(" - "));
+
 #if defined(__SAM3X8E__)
               client.print(ENUM_CAT_NR[cat*2+1]);
 #else
               client.print(pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2+1) * sizeof(ENUM_CAT_NR[0])));
+              //???//strcat_P(buffer, pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2+1) * sizeof(ENUM_CAT_NR[0])));
 #endif
-              clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
+              //bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
+              bufferedprint(client, PSTR("</td></tr>\n"));
+    //strcat_P(buffer,  PSTR("</td></tr>\n"));
+    //client.print(buffer);
             }
           }
-          client.println(F("</table>"));
+      free(formatbuf);
+          bufferedprint(client, PSTR("</table>"));
           webPrintFooter();
           break;
         }
@@ -5160,17 +5196,17 @@ ich mir da nicht)
 
                 sprintf(outBuf,"%d - %s",val,strcpy_PF(buffer, enumstr+c));
                 client.println(outBuf);
-                clientPPrint(br_html);//client.println(F("<br>"));
+                bufferedprint(client, br_html);//client.println(F("<br>"));
 
                 while(pgm_read_byte_far(enumstr+c)!=0) c++;
                 c++;
               }
             
             }else{
-              clientPPrint(MENU_TEXTPGM_ER5);//client.println(F(MENU_TEXT_ER5));
+              bufferedprint(client, PSTR(MENU_TEXT_ER5));//client.println(F(MENU_TEXT_ER5));
             }
           }else{
-            clientPPrint(MENU_TEXTPGM_ER6);//client.println(F(MENU_TEXT_ER6));
+            bufferedprint(client, MENU_TEXTPGM_ER6);//client.println(F(MENU_TEXT_ER6));
           }
           webPrintFooter();
           break;
@@ -5182,11 +5218,11 @@ ich mir da nicht)
           int line = atoi(&p[2]);
           int i=findLine(line,0,&c);
           if(i<0){
-            clientPPrint(MENU_TEXTPGM_ER6);//client.println(F(MENU_TEXT_ER6));
+            bufferedprint(client, MENU_TEXTPGM_ER6);//client.println(F(MENU_TEXT_ER6));
           }else{
             if(!bus.Send(TYPE_QRV, c, msg, tx_msg)){
               DebugOutput.println(F("set failed"));  // to PC hardware serial I/F
-              clientPPrint(MENU_TEXTPGM_ER3);//client.println(F(MENU_TEXT_ER3));
+              bufferedprint(client, MENU_TEXTPGM_ER3);//client.println(F(MENU_TEXT_ER3));
             }else{
 
               // Decode the xmit telegram and send it to the PC serial interface
@@ -5204,7 +5240,7 @@ ich mir da nicht)
 #endif
               if(outBufLen>0){
                 client.println(outBuf);
-                clientPPrint(br_html);//client.println(F("<br>"));
+                bufferedprint(client, br_html);//client.println(F("<br>"));
               }
             }
           }
@@ -5215,10 +5251,10 @@ ich mir da nicht)
         if(p[1]=='Q') {
           webPrintHeader();
 
-          clientPPrintBR(MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
-          clientPPrint(BSB_VERSION);//client.print(F(BSB_VERSION));
-          clientPPrint(br_html);//client.println(F("<br>"));
-          client.print(F(MENU_TEXT_QSC "...<BR>"));
+          bufferedprint(client, MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
+          bufferedprint(client, BSB_VERSION);//client.print(F(BSB_VERSION));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
+          bufferedprint(client, PSTR(MENU_TEXT_QSC "...<BR>"));
           if (bus.getBusType() == BUS_BSB) {
             bus.setBusType(BUS_BSB, myAddr, 0x7F);
           }
@@ -5250,15 +5286,15 @@ ich mir da nicht)
                   }
                 }
                 if (!found) {
-                  client.print(F(MENU_TEXT_QFD ": "));
+                  bufferedprint(client, PSTR(MENU_TEXT_QFD ": "));
                   client.print(found_id);
-                  clientPPrint(br_html);//client.println(F("<br>"));
+                  bufferedprint(client, br_html);//client.println(F("<br>"));
                 }
               }
               delay(1);
             }
           } else {
-            client.println(F(MENU_TEXT_QFA "!<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_QFA "!<BR>"));
           }
 
           for (int x=0;x<10;x++) {
@@ -5266,9 +5302,9 @@ ich mir da nicht)
               continue;
             }
             bus.setBusType(bus.getBusType(), myAddr, found_ids[x]);
-            client.print(F("<BR>" MENU_TEXT_QRT " "));
+            bufferedprint(client, PSTR("<BR>" MENU_TEXT_QRT " "));
             client.print(found_ids[x]);
-            client.println(F(":<BR>"));
+            bufferedprint(client, PSTR(":<BR>\n"));
 
             uint32_t c=0;
             uint16_t l;
@@ -5279,7 +5315,7 @@ ich mir da nicht)
             int temp_dev_var = strtod(query(6226,6226,1),NULL);
             my_dev_fam = temp_dev_fam;
             my_dev_var = temp_dev_var;
-            client.print(F(STR6225_TEXT ": "));
+            bufferedprint(client, PSTR(STR6225_TEXT ": "));
             client.println(temp_dev_fam);
             clientPPrintBR(STR6226);//client.print(F("<BR>" STR6226_TEXT ": "));
             client.println(temp_dev_var);
@@ -5315,24 +5351,24 @@ ich mir da nicht)
             client.println(query(10003,10003,1));
             clientPPrintBR(STR8700);client.print(F("(10004): "));//client.print(F("<BR>" STR8700_TEXT " (10004): "));
             client.println(query(10004,10004,1));
-            client.println(F("<BR><BR>"));
+            bufferedprint(client, PSTR("<BR><BR>\n"));
 
             int params[] = {6225, 6226, 6224, 6220, 6221, 6227, 6229, 6231, 6232, 6233, 6234, 6235, 6223, 6236, 6237};
             for (int i=0; i<15; i++) {
               client.print(params[i]);
               client.print(F(";"));
             }
-            clientPPrint(br_html);//client.println(F("<br>"));
+            bufferedprint(client, br_html);//client.println(F("<br>"));
             for (int i=0; i<15; i++) {
               client.print(query(params[i], params[i], 1));
               client.print(F(";"));
             }
 
-            client.println(F("<BR><BR>"));
+            bufferedprint(client, PSTR("<BR><BR>\n"));
             my_dev_fam = orig_dev_fam;
             my_dev_var = orig_dev_var;
 
-            client.println(F("<BR>" MENU_TEXT_QST "...<BR>"));
+           bufferedprint(client, PSTR("<BR>" MENU_TEXT_QST "...<BR>"));
             for (int j=0;j<10000;j++) {
               if (get_cmdtbl_cmd(j) == c) {
                 continue;
@@ -5365,19 +5401,19 @@ ich mir da nicht)
                       my_dev_fam = orig_dev_fam;
                       my_dev_var = orig_dev_var;
                       if (pvalstr[0]<1) {
-                        clientPPrint(br_html);//client.println(F("<br>"));
+                        bufferedprint(client, br_html);//client.println(F("<br>"));
                         client.print(l);
-                        clientPPrint(br_html);//client.println(F("<br>"));
+                        bufferedprint(client, br_html);//client.println(F("<br>"));
                         if(outBufLen>0){
                           client.println(outBuf);
-                          clientPPrint(br_html);//client.println(F("<br>"));
+                          bufferedprint(client, br_html);//client.println(F("<br>"));
                         }
                         for (int i=0;i<tx_msg[bus.getLen_idx()]+bus.getBusType();i++) {
                           if (tx_msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
                           client.print(tx_msg[i], HEX);
                           client.print(F(" "));
                         }
-                        clientPPrint(br_html);//client.println(F("<br>"));
+                        bufferedprint(client, br_html);//client.println(F("<br>"));
                         for (int i=0;i<msg[bus.getLen_idx()]+bus.getBusType();i++) {
                           if (msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
                           client.print(msg[i], HEX);
@@ -5389,10 +5425,10 @@ ich mir da nicht)
                 }
               }
             }
-            client.println(F(MENU_TEXT_QTE ".<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_QTE ".<BR>\n"));
           }
 
-          client.println(F("<BR>" MENU_TEXT_QFE ".<BR>"));
+          bufferedprint(client, PSTR("<BR>" MENU_TEXT_QFE ".<BR>"));
           bus.setBusType(bus.getBusType(), myAddr, destAddr);   // return to original destination address
           webPrintFooter();
           break;
@@ -5419,31 +5455,28 @@ ich mir da nicht)
 #endif
           if(outBufLen>0){
             client.println(outBuf);
-            clientPPrint(br_html);//client.println(F("<br>"));
+            bufferedprint(client, br_html);//client.println(F("<br>"));
           }
           for (int i=0;i<tx_msg[bus.getLen_idx()]+bus.getBusType();i++) {
             if (tx_msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
             client.print(tx_msg[i], HEX);
             client.print(F(" "));
           }
-          client.println();
-          clientPPrint(br_html);//client.println(F("<br>"));
+          //client.println();
+          bufferedprint(client, br_html);//client.println(F("<br>"));
           for (int i=0;i<msg[bus.getLen_idx()]+bus.getBusType();i++) {
             if (msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
             client.print(msg[i], HEX);
             client.print(F(" "));
           }
-          client.println();
+          //client.println();
           webPrintFooter();
 #endif
           break;
         }
 
         if (p[1]=='J') {
-          client.println(F("HTTP/1.1 200 OK"));
-          client.println(F("Content-Type: application/json; charset=utf-8"));
-          client.println();
-          client.println(F("{"));
+          bufferedprint(client, PSTR("HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{"));
 
           int i=0;
           uint32_t cmd=0;
@@ -5522,26 +5555,25 @@ ich mir da nicht)
               if (p[2]=='K' && !isdigit(p[4])) {
                 uint16_t x=2;
                 uint8_t cat=0;
-                client.print(F("\"0\": { \"name\": \""));
+                bufferedprint(client, PSTR("\"0\": { \"name\": \""));
                 while (x<sizeof(ENUM_CAT)) {
                   char z = pgm_read_byte_far(pgm_get_far_address(ENUM_CAT)+x);
                   if (z == '\0') {
                     cat_min = pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0]));
                     cat_max = pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2+1) * sizeof(ENUM_CAT_NR[0]));
-                    client.print(F("\", \"min\": "));
+                    bufferedprint(client, PSTR("\", \"min\": "));
                     client.print(cat_min);
-                    client.print(F(", \"max\": "));
+                    bufferedprint(client, PSTR(", \"max\": "));
                     client.print(cat_max);
                     if (x < sizeof(ENUM_CAT)-1 && cat < 42) {
                       cat++;
-                      client.println(F(" },"));
-                      client.print(F("\""));
+                      bufferedprint(client, PSTR(" },\""));
                       client.print(cat);
-                      client.print(F("\": { \"name\": \""));
+                      bufferedprint(client, PSTR("\": { \"name\": \""));
                       x = x + 3;
                       continue;
                     } else {
-                      client.print(F(" }"));
+                      bufferedprint(client, PSTR(" }"));
                       json_token = NULL;
                       break;
                     }
@@ -5769,9 +5801,7 @@ ich mir da nicht)
 #endif
             webPrintFooter();
           } else {  // dump datalog file
-            client.println(F("HTTP/1.1 200 OK"));
-            client.println(F("Content-Type: text/plain; charset=utf-8"));
-            client.println();
+            bufferedprint(client, PSTR("HTTP/1.1 200 OK\nContent-Type: text/plain; charset=utf-8\n\n"));
 
             File dataFile = SD.open("datalog.txt");
             // if the file is available, read from it:
@@ -5802,75 +5832,78 @@ ich mir da nicht)
 #endif
         if (p[1]=='C'){ // dump configuration
           webPrintHeader();
-          client.println(F(MENU_TEXT_CFG "<BR>"));
+          bufferedprint(client, PSTR(MENU_TEXT_CFG "<BR>"));
 //          client.println(F("BSB pins: "));
 //          client.println(bus);
 //          client.println(F("<BR><BR>"));
 
-          clientPPrintBR(MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
-          clientPPrint(BSB_VERSION);//client.print(F(BSB_VERSION));
-          clientPPrint(br_html);//client.println(F("<br>"));
-          client.print(F(MENU_TEXT_RAM ": "));
+          bufferedprint(client, MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
+          bufferedprint(client, BSB_VERSION);//client.print(F(BSB_VERSION));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
+          bufferedprint(client, PSTR(MENU_TEXT_RAM ": "));
           client.print(freeRam());
-          client.println(F(" Bytes <BR>"));
-
-          client.print(F(MENU_TEXT_UPT ": "));
+          bufferedprint(client, PSTR(" Bytes <BR>"));
+          bufferedprint(client, PSTR(MENU_TEXT_UPT ": "));
           client.print(millis());
-          clientPPrint(br_html);//client.println(F("<br>"));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
 
           myAddr = bus.getBusAddr();
           destAddr = bus.getBusDest();
-          client.print(F(MENU_TEXT_BUS ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_BUS ": "));
           switch (bus.getBusType()) {
-            case 0: client.print(F("BSB")); break;
-            case 1: client.print(F("LPB")); break;
-            case 2: client.print(F("PPS")); break;
+            case 0: bufferedprint(client, PSTR("BSB")); break;
+            case 1: bufferedprint(client, PSTR("LPB")); break;
+            case 2: bufferedprint(client, PSTR("PPS")); break;
           }
           if (bus.getBusType() != BUS_PPS) {
-            client.print(F(" ("));
+            bufferedprint(client, PSTR(" ("));
             client.print(myAddr);
-            client.print(F(", "));
+            bufferedprint(client, PSTR(", "));
             client.print(destAddr);
-            client.print(F(") "));
+            bufferedprint(client, PSTR(") "));
             if (DEFAULT_FLAG == FL_RONLY) {
-              client.print(F(MENU_TEXT_BRO));
+              bufferedprint(client, PSTR(MENU_TEXT_BRO));
             } else {
-              client.print(F(MENU_TEXT_BRW));
+              bufferedprint(client, PSTR(MENU_TEXT_BRW));
             }
           } else {
             if (*PPS_write_enabled == 1) {
-              client.print(F(" (" MENU_TEXT_BRW ")"));
+              bufferedprint(client, PSTR(" (" MENU_TEXT_BRW ")"));
             } else {
-              client.print(F(" (" MENU_TEXT_BRO ")"));
+              bufferedprint(client, PSTR(" (" MENU_TEXT_BRO ")"));
             }
           }
-          clientPPrint(br_html);//client.println(F("<br>"));
-          client.print(F(MENU_TEXT_MMD ": "));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
+          bufferedprint(client, PSTR(MENU_TEXT_MMD ": "));
           client.println(monitor);
-          client.print(F("<BR>" MENU_TEXT_VBL ": "));
+          bufferedprint(client, PSTR("<BR>" MENU_TEXT_VBL ": "));
           client.print(verbose);
-          clientPPrint(br_html);//client.println(F("<br>"));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
           
           #ifdef ONE_WIRE_BUS
-          client.println(F(MENU_TEXT_OWP ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_OWP ": "));
           client.println(ONE_WIRE_BUS);
-          clientPPrint(br_html);//client.println(F("<br>"));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
           #endif
 
           #ifdef DHT_BUS
-          client.println(F(MENU_TEXT_DHP ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_DHP ": "));
           client.println(DHT_BUS);
-          clientPPrint(br_html);//client.println(F("<br>"));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
           #endif
 
-          client.println(F(MENU_TEXT_EXP ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_EXP ": "));
           for (int i=0; i<anz_ex_gpio; i++) {
             client.print(exclude_GPIO[i]);
-            client.print(F(" "));
+            bufferedprint(client, PSTR(" "));
           }
-          clientPPrint(br_html);//client.println(F("<br>"));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
           
-          client.println(F(MENU_TEXT_MAC ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_MAC ": "));
+//          char mac_ascii[18]; / use "buffer"??
+//          sprintf(mac_ascii, "%02x:%02x:%02x:%02x:%02x:%02x",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+//          client.print(mac_ascii);
+          
           for (int i=0; i<=5; i++) {
             if (mac[i] < 10) {
               client.print(F("0"));
@@ -5878,7 +5911,7 @@ ich mir da nicht)
             client.print(mac[i], HEX);
             if(i != 5) client.print(F(":"));
           }
-          clientPPrint(br_html);//client.println(F("<br>"));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
 
 /*
           client.println(F("IP address: "));
@@ -5886,16 +5919,16 @@ ich mir da nicht)
           clientPPrint(br_html);//client.println(F("<br>"));
 */
 
-          client.println(F(MENU_TEXT_AVT ": <BR>"));
+          bufferedprint(client, PSTR(MENU_TEXT_AVT ": <BR>"));
           for (int i=0; i<numAverages; i++) {
             if (avg_parameters[i] > 0) {
               client.print (avg_parameters[i]);
-              client.print(F(" - "));
+              bufferedprint(client, PSTR(" - "));
               client.print(lookup_descr(avg_parameters[i])); 
-              clientPPrint(br_html);//client.println(F("<br>"));
+              bufferedprint(client, br_html);//client.println(F("<br>"));
             }
           }
-          clientPPrint(br_html);//client.println(F("<br>"));
+         bufferedprint(client, br_html);//client.println(F("<br>"));
 
           #ifdef LOGGER
           client.println(F(MENU_TEXT_LGP " "));
@@ -5960,12 +5993,12 @@ ich mir da nicht)
                   }
                 }
               }
-              clientPPrint(br_html);//client.println(F("<br>"));
+              bufferedprint(client, br_html);//client.println(F("<br>"));
             }
           }
           #endif
 
-          clientPPrint(br_html);//client.println(F("<br>"));
+          bufferedprint(client, br_html);//client.println(F("<br>"));
           webPrintFooter();
 
 #if defined(__AVR__)
@@ -5989,11 +6022,11 @@ ich mir da nicht)
             log_bc_only=0;
           }
           webPrintHeader();
-          client.print(F(MENU_TEXT_LBO ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_LBO ": "));
           if (log_bc_only) {
-            client.println(F(MENU_TEXT_YES "<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_YES "<BR>"));
           } else {
-            client.println(F(MENU_TEXT_NO "<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_NO "<BR>"));
           }
           webPrintFooter();
           break;
@@ -6005,11 +6038,11 @@ ich mir da nicht)
             log_unknown_only=0;
           }
           webPrintHeader();
-          client.print(F(MENU_TEXT_BUT ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_BUT ": "));
           if (log_unknown_only) {
-            client.println(F(MENU_TEXT_YES "<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_YES "<BR>"));
           } else {
-            client.println(F(MENU_TEXT_NO "<BR>"));
+            bufferedprint(client, PSTR(MENU_TEXT_NO "<BR>"));
           }
           webPrintFooter();
           break;
@@ -6023,9 +6056,9 @@ ich mir da nicht)
 //            if (log_interval < 10) {log_interval = 10;}
             lastLogTime = millis();
             lastMQTTTime = millis();
-            client.print(F(MENU_TEXT_LGI ": "));
+            bufferedprint(client, PSTR(MENU_TEXT_LGI ": "));
             client.print(log_interval);
-            client.println(F(" " MENU_TEXT_SEC "<BR>"));
+            bufferedprint(client, PSTR(" " MENU_TEXT_SEC "<BR>"));
           }
           log_token = strtok(NULL,"=,");    // subsequent tokens: logging parameters
           int token_counter = 0;
@@ -6033,7 +6066,7 @@ ich mir da nicht)
             for (int i=0;i<numLogValues;i++) {
               log_parameters[i] = 0;
             }
-            client.println(F(MENU_TEXT_LGN ": "));
+            bufferedprint(client, PSTR(MENU_TEXT_LGN ": "));
           }
           while (log_token!=0) {
             int log_parameter = atoi(log_token);
@@ -6063,18 +6096,18 @@ ich mir da nicht)
             destAddr = (uint8_t)val;
           }
 
-          client.print(F(MENU_TEXT_BUS ": "));
+          bufferedprint(client, PSTR(MENU_TEXT_BUS ": "));
           if (p[2]=='0') {
             bus.setBusType(BUS_BSB, myAddr, destAddr);
-            client.println(F("BSB"));
+            bufferedprint(client, PSTR("BSB"));
           }
           if (p[2]=='1') {
             bus.setBusType(BUS_LPB, myAddr, destAddr);
-            client.println(F("LPB"));
+            bufferedprint(client, PSTR("LPB"));
           } 
           if (p[2]=='2') {
             bus.setBusType(BUS_PPS, myAddr);
-            client.println(F("PPS"));
+            bufferedprint(client, PSTR("PPS"));
           }           
           if (bus.getBusType() != BUS_PPS) {
             client.print(F(" ("));
@@ -6084,9 +6117,9 @@ ich mir da nicht)
             client.print(F(")"));
           } else {
             if (*PPS_write_enabled == 1) {
-              client.print(F(" " MENU_TEXT_BRW));
+              bufferedprint(client, PSTR(" " MENU_TEXT_BRW));
             } else {
-              client.print(F(" " MENU_TEXT_BRO));
+              bufferedprint(client, PSTR(" " MENU_TEXT_BRO));
             }
           }
 
@@ -6098,7 +6131,7 @@ ich mir da nicht)
 #ifdef RESET
           webPrintHeader();
           if (p[2]=='E') {
-            client.println(F("Clearing EEPROM (affects MAX! devices and PPS-Bus settings)...<BR>"));
+            bufferedprint(client, PSTR("Clearing EEPROM (affects MAX! devices and PPS-Bus settings)...<BR>"));
           }
           webPrintFooter();
           client.stop();
@@ -6114,7 +6147,7 @@ ich mir da nicht)
             }
             DebugOutput.println(F("Cleared EEPROM"));
           }
-          client.println(F("Restarting Arduino..."));
+          bufferedprint(client, PSTR("Restarting Arduino..."));
 #if defined(__SAM3X8E__)
           // TODO
 #else
@@ -6166,7 +6199,7 @@ ich mir da nicht)
                   max_id[y] = pgm_read_byte_far(pgm_get_far_address(max_device_list)+(x*10)+y);
                 }
                 max_id[10] = '\0';
-                clientPPrint(td_tr_open_html);//client.print(F("<tr><td>"));
+                bufferedprint(client, td_tr_open_html);//client.print(F("<tr><td>"));
                 client.print(max_id);
                 client.print(F(" ("));
                 client.print(max_devices[x], HEX);
@@ -6179,14 +6212,14 @@ ich mir da nicht)
                   client.print(max_valve[x]);
                   client.print(F("%)"));
                 }
-                clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
+                bufferedprint(client, td_tr_close_html);
               }
             }
             if (max_avg_count > 0) {
-              clientPPrint(td_tr_open_html);//client.print(F("<tr><td>"));
+              bufferedprint(client, td_tr_open_html);//client.print(F("<tr><td>"));
               client.print(F("AvgMax: "));
               client.print(max_avg / max_avg_count);
-              clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
+              bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
             } else {
               client.println(F("<tr><td>" MENU_TEXT_MXN "</td></tr>"));
             }
@@ -6207,7 +6240,7 @@ ich mir da nicht)
 #ifdef LOGGER
                 SD.remove("averages.txt");
 #endif
-                client.println(F(MENU_TEXT_24N ": "));
+                bufferedprint(client, PSTR(MENU_TEXT_24N ": "));
               }
               while (avg_token!=0) {
                 int avg_parameter = atoi(avg_token);
@@ -6222,7 +6255,7 @@ ich mir da nicht)
             } else {
               for (int i=0; i<numAverages; i++) {
                 if (avg_parameters[i] > 0) {
-                  clientPPrint(td_tr_open_html);//client.print(F("<tr><td>"));
+                  bufferedprint(client, td_tr_open_html);//client.print(F("<tr><td>"));
                   client.print(avg_parameters[i]);
                   client.print(F(" Avg"));
                   client.print(lookup_descr(avg_parameters[i]));            
@@ -6252,7 +6285,7 @@ ich mir da nicht)
                   }
                   client.println(div_unit);
 
-                  clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
+                  bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
 
                   Serial.print(F("#avg_"));
                   Serial.print(avg_parameters[i]);
@@ -6270,7 +6303,7 @@ ich mir da nicht)
             bool error = false;
             p=range+1;
             if(!isdigit(*p)){   // now we check for digits
-              clientPPrint(MENU_TEXTPGM_ER1);//client.println(F(MENU_TEXT_ER1));
+              bufferedprint(client, MENU_TEXTPGM_ER1);//client.println(F(MENU_TEXT_ER1));
               break;
             }
             pin=(uint8_t)atoi(p);       // convert until non-digit char is found
@@ -6281,7 +6314,7 @@ ich mir da nicht)
               }
             }
             if (error==true) {
-              clientPPrint(MENU_TEXTPGM_ER7);//client.println(F(MENU_TEXT_ER7));
+              bufferedprint(client, MENU_TEXTPGM_ER7);//client.println(F(MENU_TEXT_ER7));
               break;
             }
 
@@ -6314,7 +6347,7 @@ ich mir da nicht)
             client.print(val!=LOW?F("1"):F("0"));
           }else if(range[0]=='B'){
             if(range[1]=='0'){ // reset furnace duration
-              client.println(F(MENU_TEXT_BRS ".<br>"));
+              bufferedprint(client, PSTR(MENU_TEXT_BRS ".<br>"));
               brenner_duration=0;
               brenner_count=0;
               brenner_duration_2=0;
@@ -6323,24 +6356,26 @@ ich mir da nicht)
               TWW_count=0;
             }else{
               // query brenner duration
-              client.print(F("<tr><td>Brenner Laufzeit Stufe 1: "));
+              bufferedprint(client, PSTR("<tr><td>Brenner Laufzeit Stufe 1: "));
               client.print(brenner_duration);
-              client.println(F("</td></tr><tr><td>"));
-              client.print(F("Brenner Takte Stufe 1: "));
+              bufferedprint(client, td_tr_close_html);
+              bufferedprint(client, PSTR("\n<tr><td>Brenner Takte Stufe 1: "));
+              //client.print(F("Brenner Takte Stufe 1: "));
               client.print(brenner_count);
-              clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
-              client.print(F("<tr><td>Brenner Laufzeit Stufe 2: "));
+              bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
+              bufferedprint(client, PSTR("\n<tr><td>Brenner Laufzeit Stufe 2: "));
               client.print(brenner_duration_2);
-              client.println(F("</td></tr><tr><td>"));
-              client.print(F("Brenner Takte Stufe 2: "));
+              //client.println(F("</td></tr>"));
+              bufferedprint(client, td_tr_close_html);
+              bufferedprint(client, PSTR("\n<tr><td>Brenner Takte Stufe 2: "));
               client.print(brenner_count_2);
-              clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
-              client.print(F("<tr><td>TWW Laufzeit: "));
+              bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
+              bufferedprint(client, PSTR("\n<tr><td>TWW Laufzeit: "));
               client.print(TWW_duration);
-              client.println(F("</td></tr><tr><td>"));
-              client.print(F("TWW Takte: "));
+              bufferedprint(client, td_tr_close_html);
+              bufferedprint(client, PSTR("\n<tr><td>TWW Takte: "));
               client.print(TWW_count);
-              clientPPrint(td_tr_close_html);//client.println(F("</td></tr>"));
+              bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
             }
           }else{
             if(range[0]=='K'){
@@ -6721,7 +6756,7 @@ ich mir da nicht)
       dataFile.close();
    } else {
     // if the file isn't open, pop up an error:
-      client.println(F(MENU_TEXT_DTO));
+      bufferedprint(client, PSTR(MENU_TEXT_DTO));
       DebugOutput.println(F("Error opening datalog.txt!"));
     }
     lastLogTime = millis();
@@ -6966,23 +7001,25 @@ void printWifiStatus()
 
 // PROGMEM print incl. html line breaks
 void clientPPrintBR(const char str[]) {
-  clientPPrint(br_html);
-  clientPPrint(str);
-  client.print(F(": "));
+//  clientPPrint(br_html);
+//  clientPPrint(str);
+//  client.print(F(": "));
+  bufferedprint(client, br_html);
+  bufferedprint(client, str);
+  bufferedprint(client, PSTR(": "));
+//  strncpy_P(buffer, br_html, sizeof(br_html));
+//  strcat_P(buffer, str);
+//  strcat_P(buffer, PSTR("\n"));
+//  buffer[BUFLEN - 1] = 0;
+//  client.print(buffer);
 }
 
 // PROGMEM print (reads & print char array from PROGMEM)
-void clientPPrint(const char str[]) {
-  char c;
-  while((c = pgm_read_byte(str++))) // alle chars lesen
-  //while((c = pgm_read_word_far(str++))) // alle chars lesen
-    client.write(c);   // und ausgeben
-}
-
-//void DebugOutputPPrint(const char str[]) {
+//void clientPPrint(const char str[]) {
 //  char c;
 //  while((c = pgm_read_byte(str++))) // alle chars lesen
-//    DebugOutput.write(c);   // und ausgeben
+//  //while((c = pgm_read_word_far(str++))) // alle chars lesen
+//    client.write(c);   // und ausgeben
 //}
 
 
