@@ -5120,10 +5120,10 @@ ich mir da nicht)
           #endif
           bufferedprint(client, PSTR("A'>" MENU_TEXT_24A "</a></td><td></td></tr>"));
           bufferedprint(client, PSTR("<tr><td>&nbsp;</td><td>&nbsp;</td></tr>\n"));
-    #define K_FORMAT_TBL "<tr><td><a href='K%u'>%s</a></td><td>"
-    //TODO: add CAT_NR to formatbuf. "...%u - %u</td></tr>\n"
-    char *formatbuf = (char *)malloc(sizeof(K_FORMAT_TBL)+1);
-    strcpy_P(formatbuf, PSTR(K_FORMAT_TBL));
+          #define K_FORMAT_TBL "<tr><td><a href='K%u'>%s</a></td><td>%d - %d</td></tr>\n"
+          char *formatbuf = (char *)malloc(sizeof(K_FORMAT_TBL)+1); //TODO: validate if malloc was successful?
+          int16_t cat_min = -1, cat_max = -1;
+          strcpy_P(formatbuf, PSTR(K_FORMAT_TBL));
           for(int cat=0;cat<CAT_UNKNOWN;cat++){
             outBufclear();
             if ((bus.getBusType() != BUS_PPS) || (bus.getBusType() == BUS_PPS && cat == CAT_PPS)) {
@@ -5133,35 +5133,21 @@ ich mir da nicht)
               printENUM(pgm_get_far_address(ENUM_CAT),len,cat,1);
 #endif
               DebugOutput.println();
-              //bufferedprint(client, PSTR("<tr><td><A HREF='K"));
-              //client.print(cat);
-              //bufferedprint(client, PSTR("'>"));
-              //client.print(outBuf);
-              //bufferedprint(client, PSTR("</A></td><td>\n"));
-     sprintf(buffer, formatbuf, cat, outBuf);
-     client.print(buffer);
 #if defined(__SAM3X8E__)
-              client.print(ENUM_CAT_NR[cat*2]);
+              cat_min = ENUM_CAT_NR[cat*2];
 #else
-              client.print(pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0])));
-              //???/strcat_P(buffer, pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0])));
+              cat_min = pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0]));
 #endif
-              bufferedprint(client, PSTR(" - "));
-    //strcat_P(buffer, PSTR(" - "));
-
 #if defined(__SAM3X8E__)
-              client.print(ENUM_CAT_NR[cat*2+1]);
+              cat_max = ENUM_CAT_NR[cat*2+1];
 #else
-              client.print(pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2+1) * sizeof(ENUM_CAT_NR[0])));
-              //???//strcat_P(buffer, pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2+1) * sizeof(ENUM_CAT_NR[0])));
+              cat_max = pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2+1) * sizeof(ENUM_CAT_NR[0]));
 #endif
-              //bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
-              bufferedprint(client, PSTR("</td></tr>\n"));
-    //strcat_P(buffer,  PSTR("</td></tr>\n"));
-    //client.print(buffer);
+              sprintf(buffer, formatbuf, cat, outBuf, cat_min, cat_max);
+              client.print(buffer);
             }
           }
-      free(formatbuf);
+          free(formatbuf);
           bufferedprint(client, PSTR("</table>"));
           webPrintFooter();
           break;
