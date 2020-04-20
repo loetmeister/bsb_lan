@@ -5446,12 +5446,9 @@ uint8_t pps_offset = 0;
               DebugOutput.println();
 #if defined(__SAM3X8E__)
               cat_min = ENUM_CAT_NR[cat*2];
-#else
-              cat_min = pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0]));
-#endif
-#if defined(__SAM3X8E__)
               cat_max = ENUM_CAT_NR[cat*2+1];
 #else
+              cat_min = pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2) * sizeof(ENUM_CAT_NR[0]));
               cat_max = pgm_read_word_far(pgm_get_far_address(ENUM_CAT_NR) + (cat*2+1) * sizeof(ENUM_CAT_NR[0]));
 #endif
               sprintf(buffer, formatbuf, cat, outBuf, cat_min, cat_max);
@@ -5644,9 +5641,9 @@ uint8_t pps_offset = 0;
             client.println(query(6236,6236,1));
             clientPPrintBR(STR6223);//client.print(F("<BR>" STR6223_TEXT ": "));
             client.println(query(6237,6237,1));
-            clientPPrintBR(STR8700);client.print(F("(10003): "));//client.print(F("<BR>" STR8700_TEXT " (10003): "));
+            clientPPrintBR(STR8700);bufferedprint(client, PSTR("(10003): "));//client.print(F("<BR>" STR8700_TEXT " (10003): "));
             client.println(query(10003,10003,1));
-            clientPPrintBR(STR8700);client.print(F("(10004): "));//client.print(F("<BR>" STR8700_TEXT " (10004): "));
+            clientPPrintBR(STR8700);bufferedprint(client, PSTR("(10004): "));//client.print(F("<BR>" STR8700_TEXT " (10004): "));
             client.println(query(10004,10004,1));
             bufferedprint(client, PSTR("<BR><BR>\n"));
 
