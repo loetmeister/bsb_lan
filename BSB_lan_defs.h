@@ -2,6 +2,9 @@
 /* DEFINITIONS and TYPEDEFS                         */
 /****************************************************/
 
+#include "bsb-version.h"
+#define BSB_VERSION MAJOR "." MINOR "." PATCH "-" COMPILETIME
+
 #if defined(__SAM3X8E__)
 #undef uint_farptr_t
 #define uint_farptr_t const char*
@@ -329,8 +332,8 @@ const char MENU_TEXTPGM_ER4[] PROGMEM = MENU_TEXT_ER4;
 //const char MENU_TEXTPGM_ER5[] PROGMEM = MENU_TEXT_ER5;
 const char MENU_TEXTPGM_ER6[] PROGMEM = MENU_TEXT_ER6;
 const char MENU_TEXTPGM_ER7[] PROGMEM = MENU_TEXT_ER7;
-
-const char MENU_VER[] PROGMEM = MENU_TEXT_VER ": ";
+//from "bsb-version.h"
+const char MENU_VER[] PROGMEM = MENU_TEXT_VER ": " MAJOR "." MINOR "." PATCH "-" COMPILETIME;
 
 
 typedef struct {

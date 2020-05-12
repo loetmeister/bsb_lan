@@ -541,8 +541,6 @@ uint16_t pps_values[PPS_ANZ] = { 0 };
 boolean time_set = false;
 uint8_t current_switchday = 0;
 
-#include "bsb-version.h"
-const char BSB_VERSION[] PROGMEM = { MAJOR "." MINOR "." PATCH "-" COMPILETIME };
 
 #include "BSB_lan_custom_global.h"
 
@@ -2594,21 +2592,18 @@ void webPrintHeader(void){
 #endif
 
 #ifdef PASSKEY
-  client.print(PASSKEY);
-  client.print(F("/"));
+  bufferedprint(client, PSTR(PASSKEY "/"));
 #endif
   bufferedprint(client, PSTR("'>BSB-LAN Web</A></h1></center><table width=80% align=center><tr bgcolor=#f0f0f0><td width=20% align=center><a href='/"));
   
 #ifdef PASSKEY
-  client.print(PASSKEY);
-  client.print(F("/"));
+  bufferedprint(client, PSTR(PASSKEY "/"));
 #endif
   bufferedprint(client, PSTR("K'>" MENU_TEXT_HFK "</a></td><td width=20% align=center><a href='/"));
   //bufferedprint(client, PSTR("<td width=20% align=center><a href='/"));
   
 #ifdef PASSKEY
-  client.print(PASSKEY);
-  client.print(F("/"));
+  bufferedprint(client, PSTR(PASSKEY "/"));
 #endif
   bufferedprint(client, PSTR("T'>" MENU_TEXT_SNS "</a></td><td width=20% align=center>"));
   //bufferedprint(client, PSTR("<td width=20% align=center>"));
@@ -2619,8 +2614,7 @@ void webPrintHeader(void){
   bufferedprint(client, PSTR("<a href='/"));
   
 #ifdef PASSKEY
-  client.print(PASSKEY);
-  client.print(F("/"));
+  bufferedprint(client, PSTR(PASSKEY "/"));
 #endif
   bufferedprint(client, PSTR("DG'>" MENU_TEXT_SLG "</a>"));
 #endif
@@ -2628,8 +2622,7 @@ void webPrintHeader(void){
   bufferedprint(client, PSTR("</td><td width=20% align=center><a href='/"));
 
 #ifdef PASSKEY
-  client.print(PASSKEY);
-  client.print(F("/"));
+  bufferedprint(client, PSTR(PASSKEY "/"));
 #endif
   bufferedprint(client, PSTR("Q'>" MENU_TEXT_CHK "</a>"));
 
@@ -2637,8 +2630,7 @@ void webPrintHeader(void){
   bufferedprint(client, PSTR("<tr bgcolor=#f0f0f0><td width=20% align=center><a href='/"));
   
 #ifdef PASSKEY
-  client.print(PASSKEY);
-  client.print(F("/"));
+  bufferedprint(client, PSTR(PASSKEY "/"));
 #endif
   bufferedprint(client, PSTR("C'>" MENU_TEXT_CFG "</a></td>"));
   bufferedprint(client, PSTR("<td width=20% align=center><a href='" MENU_LINK_URL "' target='_new'>" MENU_TEXT_URL "</a></td>"));
@@ -2679,14 +2671,14 @@ void webPrintFooter(void){
 void webPrintSite() {
   webPrintHeader();
 
-  bufferedprint(client, PSTR("<p>BSB-LAN Web, Version "));
-  bufferedprint(client, BSB_VERSION);
+  bufferedprint(client, PSTR("<p>BSB-LAN Web, "));
+  bufferedprint(client, MENU_VER);
   bufferedprint(client, PSTR("<p><b>" MENU_TEXT_HFK ":</b> " MENU_DESC_HFK));
   bufferedprint(client, PSTR("<p><b>" MENU_TEXT_CFG ":</b> " MENU_DESC_CFG));
   bufferedprint(client, PSTR("<p><b>" MENU_TEXT_URL ":</b> " MENU_DESC_URL));
 
 #ifdef VERSION_CHECK
-  client.println(F("<BR><BR>" MENU_TEXT_NVS "...<BR>"));
+  bufferedprint(client, PSTR("<BR><BR>" MENU_TEXT_NVS "...<BR>"));
 
   httpclient.connect("bsb-lan.de", 80);
   httpclient.println("GET /bsb-version.h");
@@ -3676,11 +3668,11 @@ char* query(int line_start  // begin at this line (ProgNr)
 
               // Decode the rcv telegram and send it to the PC serial interface
               pvalstr=printTelegram(msg, line);
-              Serial.print(F("#"));
-              Serial.print(line);
-              Serial.print(F(": "));
-              Serial.println(pvalstr);
-              Serial.flush();
+              DebugOutput.print(F("#"));
+              DebugOutput.print(line);
+              DebugOutput.print(F(": "));
+              DebugOutput.println(pvalstr);
+              DebugOutput.flush();
 #ifdef LOGGER
               LogTelegram(msg);
 #endif
@@ -3724,11 +3716,11 @@ char* query(int line_start  // begin at this line (ProgNr)
 */
           pvalstr = printTelegram(msg, line);
 
-          Serial.print(F("#"));
-          Serial.print(line);
-          Serial.print(F(": "));
-          Serial.println(pvalstr);
-          Serial.flush();
+          DebugOutput.print(F("#"));
+          DebugOutput.print(line);
+          DebugOutput.print(F(": "));
+          DebugOutput.println(pvalstr);
+          DebugOutput.flush();
         }
       }else{
         //DebugOutput.println(F("unknown command"));
@@ -4227,7 +4219,7 @@ void Ipwe() {
   }
 #endif
 
-  client.print(F("</tbody></table></form>"));
+  bufferedprint(client, PSTR("</tbody></table></form>"));
 }
 
 #endif    // --- Ipwe() ---
@@ -5421,13 +5413,11 @@ uint8_t pps_offset = 0;
 //          buffer[len]=0;
           bufferedprint(client, PSTR("<table><tr><td><a href='/"));
           #ifdef PASSKEY
-            client.print(PASSKEY);
-            client.print(F("/"));
+            bufferedprint(client, PSTR(PASSKEY "/"));
           #endif
           bufferedprint(client, PSTR("B'>" MENU_TEXT_BST "</A><BR></td><td></td></tr>\n<tr><td><a href='/"));
           #ifdef PASSKEY
-            client.print(PASSKEY);
-            client.print(F("/"));
+            bufferedprint(client, PSTR(PASSKEY "/"));
           #endif
           bufferedprint(client, PSTR("A'>" MENU_TEXT_24A "</a></td><td></td></tr>"));
           bufferedprint(client, PSTR("<tr><td>&nbsp;</td><td>&nbsp;</td></tr>\n"));
@@ -5546,7 +5536,7 @@ uint8_t pps_offset = 0;
           if(!(httpflags & 128)) webPrintHeader();
 
           bufferedprint(client, MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
-          bufferedprint(client, BSB_VERSION);//client.print(F(BSB_VERSION));
+          //bufferedprint(client, BSB_VERSION);//client.print(F(BSB_VERSION));
           bufferedprint(client, br_html);//client.println(F("<br>"));
           bufferedprint(client, PSTR(MENU_TEXT_QSC "...<BR>"));
           if (bus.getBusType() == BUS_BSB) {
@@ -5705,13 +5695,13 @@ uint8_t pps_offset = 0;
                         for (int i=0;i<tx_msg[bus.getLen_idx()]+bus.getBusType();i++) {
                           if (tx_msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
                           client.print(tx_msg[i], HEX);
-                          client.print(F(" "));
+                          bufferedprint(client, PSTR(" "));
                         }
                         bufferedprint(client, br_html);//client.println(F("<br>"));
                         for (int i=0;i<msg[bus.getLen_idx()]+bus.getBusType();i++) {
                           if (msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
                           client.print(msg[i], HEX);
-                          client.print(F(" "));
+                          bufferedprint(client, PSTR(" "));
                         }
                       }
                     }
@@ -5754,14 +5744,14 @@ uint8_t pps_offset = 0;
           for (int i=0;i<tx_msg[bus.getLen_idx()]+bus.getBusType();i++) {
             if (tx_msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
             client.print(tx_msg[i], HEX);
-            client.print(F(" "));
+            bufferedprint(client, PSTR(" "));
           }
           //client.println();
           bufferedprint(client, br_html);//client.println(F("<br>"));
           for (int i=0;i<msg[bus.getLen_idx()]+bus.getBusType();i++) {
             if (msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
             client.print(msg[i], HEX);
-            client.print(F(" "));
+            bufferedprint(client, PSTR(" "));
           }
           //client.println();
           webPrintFooter();
@@ -6117,15 +6107,15 @@ uint8_t pps_offset = 0;
             if (dataFile) {
               dataFile.println(F("Milliseconds;Date;Parameter;Description;Value;Unit"));
               dataFile.close();
-              client.println(F(MENU_TEXT_DTR));
+              bufferedprint(client, PSTR(MENU_TEXT_DTR));
               DebugOutput.println(F("File datalog.txt removed and recreated."));
             } else {
-              client.println(F(MENU_TEXT_DTF));
+              bufferedprint(client, PSTR(MENU_TEXT_DTF));
             }
             webPrintFooter();
           } else if (p[2]=='G') {
             webPrintHeader();
-            client.println(F("<A HREF='D'>" MENU_TEXT_DTD "</A><div align=center></div>"));
+            bufferedprint(client, PSTR("<A HREF='D'>" MENU_TEXT_DTD "</A><div align=center></div>"));
 #if defined(__SAM3X8E__)
             printPStr(graph_html, sizeof(graph_html));
 #else
@@ -6146,7 +6136,7 @@ uint8_t pps_offset = 0;
               DebugOutput.print(F("Duration: "));
               DebugOutput.println(millis()-startdump);
             } else {
-              client.println(F(MENU_TEXT_DTO));
+              bufferedprint(client, PSTR(MENU_TEXT_DTO));
             }
           }
           break;
@@ -6160,7 +6150,7 @@ uint8_t pps_offset = 0;
 //          client.println(F("<BR><BR>"));
 
           bufferedprint(client, MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
-          bufferedprint(client, BSB_VERSION);//client.print(F(BSB_VERSION));
+          //bufferedprint(client, BSB_VERSION);//client.print(F(BSB_VERSION));
           bufferedprint(client, br_html);//client.println(F("<br>"));
           bufferedprint(client, PSTR(MENU_TEXT_RAM ": "));
           client.print(freeRam());
@@ -6395,7 +6385,7 @@ uint8_t pps_offset = 0;
             if (token_counter < numLogValues) {
               log_parameters[token_counter] = log_parameter;
               client.print(log_parameters[token_counter]);
-              client.println(F(" "));
+              bufferedprint(client, PSTR(" "));
               token_counter++;
             }
             log_token = strtok(NULL,"=,");
@@ -6432,11 +6422,11 @@ uint8_t pps_offset = 0;
             bufferedprint(client, PSTR("PPS"));
           }           
           if (bus.getBusType() != BUS_PPS) {
-            client.print(F(" ("));
+            bufferedprint(client, PSTR(" ("));//client.print(F(" ("));
             client.print(myAddr);
-            client.print(F(", "));
+            bufferedprint(client, PSTR(", "));//client.print(F(", "));
             client.print(destAddr);
-            client.print(F(")"));
+            bufferedprint(client, PSTR(")"));//client.print(F(")"));
           } else {
             if (*PPS_write_enabled == 1) {
               bufferedprint(client, PSTR(" " MENU_TEXT_BRW));
@@ -6569,7 +6559,7 @@ uint8_t pps_offset = 0;
                 if (token_counter < numAverages) {
                   avg_parameters[token_counter] = avg_parameter;
                   client.print(avg_parameters[token_counter]);
-                  client.println(F(" "));
+                  bufferedprint(client, PSTR(" "));
                   token_counter++;
                 }
                 avg_token = strtok(NULL,"=,");
@@ -6579,12 +6569,12 @@ uint8_t pps_offset = 0;
                 if (avg_parameters[i] > 0) {
                   bufferedprint(client, td_tr_open_html);//client.print(F("<tr><td>"));
                   client.print(avg_parameters[i]);
-                  client.print(F(" Avg"));
+                  bufferedprint(client, PSTR(" Avg"));
                   client.print(lookup_descr(avg_parameters[i]));
-                  client.print(F(": "));
+                  bufferedprint(client, PSTR(": "));
                   float rounded = round(avgValues[i]*10);
                   client.print(rounded/10);
-                  client.print(F(" "));
+                  bufferedprint(client, PSTR(" "));
 
                   uint32_t c=0;
                   int line=findLine(avg_parameters[i],0,&c);
@@ -6609,12 +6599,12 @@ uint8_t pps_offset = 0;
 
                   bufferedprint(client, td_tr_close_html);//client.println(F("</td></tr>"));
 
-                  Serial.print(F("#avg_"));
-                  Serial.print(avg_parameters[i]);
-                  Serial.print(F(": "));
-                  Serial.print(rounded/10);
-                  Serial.print(F(" "));
-                  Serial.println(div_unit);
+                  DebugOutput.print(F("#avg_"));
+                  DebugOutput.print(avg_parameters[i]);
+                  DebugOutput.print(F(": "));
+                  DebugOutput.print(rounded/10);
+                  DebugOutput.print(F(" "));
+                  DebugOutput.println(div_unit);
 
                 }
               }
@@ -6663,10 +6653,10 @@ uint8_t pps_offset = 0;
               pinMode(pin, OUTPUT); // TODO: does this case a problem if already set as output?
               digitalWrite(pin, val);
             }
-            client.print(F("GPIO"));
+            bufferedprint(client, PSTR("GPIO"));
             client.print(pin);
-            client.print(F(": "));
-            client.print(val!=LOW?F("1"):F("0"));
+            //bufferedprint(client, PSTR(": "));
+            bufferedprint(client, val==LOW ? PSTR(": 0") : PSTR(": 1"));//client.print(val!=LOW?F("1"):F("0"));
           }else if(range[0]=='B'){
             if(range[1]=='0'){ // reset furnace duration
               bufferedprint(client, PSTR(MENU_TEXT_BRS ".<br>"));
@@ -7353,8 +7343,8 @@ custom_timer = millis();
         telnetClient = telnetServer.available();
         //      Serial.println("New telnet client.");
         telnetClient.println();
-        telnetClient.print(F("Version: "));
-        telnetClient.println(BSB_VERSION);
+        telnetClient.println(F("Version: " BSB_VERSION));
+        //telnetClient.println(F(BSB_VERSION));
         haveTelnetClient = true;
       }
     }
