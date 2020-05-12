@@ -55,6 +55,8 @@
  *       0.42  - 21.03.2019
  *       0.43  - 20.02.2020
  *       0.44  - 11.05.2020
+ *       
+ *       TODO: reduce use of client.print/bufferedprint, but use html buffer (as it is done in some parts of the code) to reduce TCP overhead
  *
  * Changelog:
  *       version 0.44
@@ -1093,7 +1095,7 @@ void SerialPrintData(byte* msg){
   int data_len=0;
   byte offset = 0;
   byte msg_type = msg[4+(bus.getBusType()*1)];
-  if (bus_type != BUS_PPS) {
+  if (bus.getBusType() != BUS_PPS) {
     if (msg_type >= 0x12) {
       offset = 4;
     }
@@ -7501,7 +7503,7 @@ void setup() {
   }
 
   bus.enableInterface();
-  bus.setBusType(bus_type);  // set bus system at boot: 0 = BSB, 1 = LPB, 2 = PPS
+  bus.setBusType(BUS_TYPE);  // set bus system at boot: 0 = BSB, 1 = LPB, 2 = PPS
 
 #ifdef WIFI
   int status = WL_IDLE_STATUS;

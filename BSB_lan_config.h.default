@@ -27,6 +27,10 @@
 */
 #define LANG DE
 
+//#define WIFI  // activate if you are using an ESP8266 AT-firmware based WiFi module
+char ssid[] = "Your_WiFi_name_goes_here";            // your network SSID (name)
+char pass[] = "Your_WiFi_password_goes_here";        // your network password
+
 /* SECURITY OPTIONS
  * There are several options to control and protect access to your heating system. However, keep  
  * in mind, that even activating all three options are no guarantee that a versatile intruder with
@@ -167,7 +171,7 @@ static byte mac[] = { 0x00, 0x80, 0x41, 0x19, 0x69, 0x90 };
 // PPS:
 // - optional third parameter set to "1" enables writing to heater - only use this if there is no other room controller (such as QAA50/QAA70) active. Fourth parameter does not have any effect.
 BSB bus(19,18); // BSB bus(68,69); // pin 68,69 = SoftwareSerial
-constexpr uint8_t bus_type = 0;  // set bus system at boot: 0 = BSB, 1 = LPB, 2 = PPS
+constexpr uint8_t BUS_TYPE = 0;  // set bus system at boot: 0 = BSB, 1 = LPB, 2 = PPS
 //#define QAA_TYPE  0x53  // 0x53 = QAA70, 0x52 = QAA50
 
 // Protect these pins from accidental GPIO access
