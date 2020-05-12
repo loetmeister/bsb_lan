@@ -2,11 +2,11 @@
 
 English version can be found <A HREF="https://github.com/fredlcore/bsb_lan/blob/master/README.md">here</A>. 
 
-LAN-Adapter für den ["Boiler-System-Bus" (BSB)](https://1coderookie.github.io/BSB-LPB-LAN/kap02.html#21-bsb-und-lpb), den ["Local-Process-Bus (LPB)](https://1coderookie.github.io/BSB-LPB-LAN/kap02.html#21-bsb-und-lpb) und die ["Punkt-zu-Punkt-Schnittstelle" (PPS)](https://1coderookie.github.io/BSB-LPB-LAN/kap02.html#22-pps-schnittstelle) - entwickelt für einen Arduino Mega 2560 mit Ethernet-Shield zur web-basierten Kontrolle (lokal über LAN aber wenn gewünscht auch über das Internet) von Elco, Brötje und baugleichen Heizungssystemen, einschließlich Logging-Funktion auf Micro-SD-Karte. Dieses Projekt kann in vielfältiger Hinsicht eine kostengünstige Alternative zum OZW 672 oder OCI 700 sein.
+LAN-Adapter für den ["Boiler-System-Bus" (BSB)](https://1coderookie.github.io/BSB-LPB-LAN/kap02.html#21-bsb-und-lpb), den ["Local-Process-Bus (LPB)](https://1coderookie.github.io/BSB-LPB-LAN/kap02.html#21-bsb-und-lpb) und die ["Punkt-zu-Punkt-Schnittstelle" (PPS)](https://1coderookie.github.io/BSB-LPB-LAN/kap02.html#22-pps-schnittstelle) - entwickelt für einen Arduino Due mit Ethernet-Shield zur web-basierten Kontrolle (lokal über LAN aber wenn gewünscht auch über das Internet) von Elco, Brötje und baugleichen Heizungssystemen, einschließlich Logging-Funktion auf Micro-SD-Karte. Dieses Projekt kann in vielfältiger Hinsicht eine kostengünstige Alternative zum OZW 672 oder OCI 700 sein.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons Lizenzvertrag" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />Dieses Werk ist lizenziert unter einer <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Namensnennung - Nicht-kommerziell - Weitergabe unter gleichen Bedingungen 4.0 International Lizenz</a>.
 
-<B>Bausätze erhältlich!</B> Auf Anfrage sind Platinen mit entsprechenden Bauteilen für die Verwendung am Arduino Mega 2560 erhältlich, bei Interesse bitte e-Mail an bsb (ät) code-it.de schicken (Deutsch/Englisch).
+<B>Bausätze erhältlich!</B> Auf Anfrage sind Platinen mit entsprechenden Bauteilen für die Verwendung am Arduino Due erhältlich, bei Interesse bitte e-Mail an bsb (ät) code-it.de schicken (Deutsch/Englisch).
 
 ***Ausführliche Informationen zum Adapter und der Software sind im [Handbuch](https://1coderookie.github.io/BSB-LPB-LAN) zu finden.***  
 *Eine Schnellinstallationsanleitung ist [hier](https://1coderookie.github.io/BSB-LPB-LAN/kap16.html) verfügbar.*  
@@ -32,9 +32,24 @@ Die folgende Auflistung gibt eine grobe Übersicht über die Reglertypen, die je
 - [RVS21/RVS61](https://1coderookie.github.io/BSB-LPB-LAN/kap03.html#3222-rvs-regler), Anschluss via BSB, vollumfänglich steuer- und bedienbar  
    
 **Weishaupt (Modell WTU):**  
-- [RVS23](https://1coderookie.github.io/BSB-LPB-LAN/kap03.html#3222-rvs-regler), Anschluss via LPB, (nahezu) vollumfänglich steuer- und bedienbar   
+- [RVS23](https://1coderookie.github.io/BSB-LPB-LAN/kap03.html#3222-rvs-regler), Anschluss via LPB, (nahezu) vollumfänglich steuer- und bedienbar      
+  
+**Im Folgenden werden einige Modellreihen verschiedener Hersteller aufgelistet, die i.d.R. BSB-LAN-kompatible Regler verbaut haben:**  
+- Brötje: BBK, BBS, BGB, BLW, BMR, BOB, BSK, SOB, WBS, WGB, WGB EVO, WGB Pro EVO, WGB-M, WGB-U, WOB  
+- Elco: Aerotop, Aquatop, Straton, Thision, Thision S, Thision S Plus  
+- Atlantic: Alféa Excellia, Extensa  
+- Austria Email: LWPK  
+- Baxi: Luna Platinum
+- CTA: Optiheat  
+- Fröling: Rendagas Plus
+- Fujitsu: Waterstage Comfort, WSHA, WSYK, WSYP
+- Grünenwald: Greenheat
+- MHG: Procon E
+- Olymp: SHS, WHS
+- Thermital: TBox Clima TOP
+- Weishaupt: WTU
    
-**Um eine detailliertere Übersicht der gemeldeten Systeme einzusehen, die bisher erfolgreich mit BSB-LAN genutzt werden, folge bitte dem entsprechenden Link:**  
+***Um eine detailliertere Übersicht der gemeldeten Systeme einzusehen, die bisher erfolgreich mit BSB-LAN genutzt werden, folge bitte dem entsprechenden Link:***  
 - **[Brötje](https://1coderookie.github.io/BSB-LPB-LAN/kap03.html#311-brötje)**
 - **[Elco](https://1coderookie.github.io/BSB-LPB-LAN/kap03.html#312-elco)**
 - **[weitere Hersteller (z.B. Fujitsu, Atlantic, Weishaupt)](https://1coderookie.github.io/BSB-LPB-LAN/kap03.html#313-weitere-hersteller)**      
@@ -55,8 +70,5 @@ Web-Interface screenshots:
 BSB-Adapterplatine unbestückt, mit den Anschlüssen CL+ und CL-:
 <img src="https://github.com/fredlcore/bsb_lan/blob/master/schematics/BSB-Board%20plain.jpg" size="50%">
 
-BSB-Adapterplatine und Ethernet-Shield auf dem Arduino Mega2560:
-<img src="https://github.com/fredlcore/bsb_lan/blob/master/schematics/BSB-Board%20on%20Arduino%20Mega%202560.jpg" size="50%">
-
-BSB-Adapterplatine auf dem Raspberry Pi 2:
-<img src="https://github.com/fredlcore/bsb_lan/blob/master/schematics/BSB-Board%20on%20Raspberry%20Pi%202.jpg" size="50%">
+BSB-Adapterplatine und Ethernet-Shield auf dem Arduino Due:
+<img src="https://github.com/fredlcore/bsb_lan/blob/master/schematics/BSB-Board%20on%20Arduino%20Due.jpg" size="50%">
