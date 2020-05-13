@@ -2748,6 +2748,15 @@ void webPrintSite() {
 } // --- webPrintSite() ---
 
 /** *****************************************************************
+ *  Function:  webPrintChoice()
+ *  Does:      prints text string to web client
+ * *************************************************************** */
+void webPrintYesNo (boolean isTrue) {
+  bufferedprint(client, isTrue ? PSTR((MENU_TEXT_YES "<BR>")) : PSTR(MENU_TEXT_NO "<BR>"));
+}
+ 
+
+/** *****************************************************************
  *  Function:  GetDateTime()
  *  Does:      Returns human-readable date/time string
  *
@@ -3773,15 +3782,15 @@ char* query(int line_start  // begin at this line (ProgNr)
         client.print(outBuf);
 
         switch(decodedTelegram.error){
-          case 1: client.println(F(" - decoding error")); break;
-          case 2: client.println(F("unknown command")); break;
-          case 4: client.println(F(" - not found")); break;
-          case 8: client.println(F("no enum str")); break;
-          case 16: client.println(F(" - unknown type")); break;
-          case 32: client.println(F(" (parameter not supported)")); break;
-          case 64: client.println(F(" (bus error)")); break;
-          case 128: client.println(F("query failed")); break;
-          default: client.println(F("")); break;
+          case 1: bufferedprint(client, PSTR(" - decoding error")); break;
+          case 2: bufferedprint(client, PSTR("unknown command")); break;
+          case 4: bufferedprint(client, PSTR(" - not found")); break;
+          case 8: bufferedprint(client, PSTR("no enum str")); break;
+          case 16: bufferedprint(client, PSTR(" - unknown type")); break;
+          case 32: bufferedprint(client, PSTR(" (parameter not supported)")); break;
+          case 64: bufferedprint(client, PSTR(" (bus error)")); break;
+          case 128: bufferedprint(client, PSTR("query failed")); break;
+          default: bufferedprint(client, PSTR("")); break;
         }
 
         float num_pvalstr = strtod(pvalstr, NULL);
@@ -3811,43 +3820,43 @@ char* query(int line_start  // begin at this line (ProgNr)
           }
         }
 */
-        client.println(F("</td><td>"));
+        bufferedprint(client, PSTR("</td><td>"));
         if (msg[4+(bus.getBusType()*4)] != TYPE_ERR && type != VT_UNKNOWN) {
           if(type == VT_ENUM || type == VT_CUSTOM_ENUM || type == VT_BIT || type == VT_ONOFF || type == VT_YESNO ) {
 
-            client.print(F("<select "));
+            bufferedprint(client, PSTR("<select "));
             if (type == VT_BIT) {
-              client.print(F("multiple "));
+              bufferedprint(client, PSTR("multiple "));
             }
-            client.print(F("id='value"));
+            bufferedprint(client, PSTR("id='value"));
             client.print(line);
-            client.println(F("'>"));
+            bufferedprint(client, PSTR("'>"));
             if (type == VT_ONOFF || type == VT_YESNO) {
 //              uint8_t pps_offset = (bus.getBusType() == BUS_PPS && *PPS_write_enabled != 1 && msg[0] != 0);
 //              int val=msg[bus.getPl_start()+1+pps_offset];
               int val=msg[bus.getPl_start()+1];
-              client.print(F("<option value='0'"));
+              bufferedprint(client, PSTR("<option value='0'"));
               if (val==0) {
-                client.print(F(" selected"));
+                bufferedprint(client, PSTR(" selected"));
               }
-              client.print(F(">"));
+              bufferedprint(client, PSTR(">"));
               if (type == VT_ONOFF) {
-                client.print(F(MENU_TEXT_OFF));
+                bufferedprint(client, PSTR(MENU_TEXT_OFF));
               } else {
-                client.print(F(MENU_TEXT_NO));
+                bufferedprint(client, PSTR(MENU_TEXT_NO));
               }
-              client.println(F("</option>"));
-              client.print(F("<option value='1'"));
+              bufferedprint(client, PSTR("</option>"));
+              bufferedprint(client, PSTR("<option value='1'"));
               if (val>0) {
-                 client.print(F(" selected"));
+                 bufferedprint(client, PSTR(" selected"));
               }
-              client.print(F(">"));
+              bufferedprint(client, PSTR(">"));
               if (type == VT_ONOFF) {
-                client.print(F(MENU_TEXT_ON));
+                bufferedprint(client, PSTR(MENU_TEXT_ON));
               } else {
-                client.print(F(MENU_TEXT_YES));
+                bufferedprint(client, PSTR(MENU_TEXT_YES));
               }
-              client.println(F("</option>"));
+              bufferedprint(client, PSTR("</option>"));
             } else {
 //              memcpy_PF(buffer, enumstr, enumstr_len);
 //              buffer[enumstr_len]=0;
@@ -3872,37 +3881,37 @@ char* query(int line_start  // begin at this line (ProgNr)
                 c+=2;
 
                 sprintf(outBuf,"%s",strcpy_PF(buffer, enumstr+c));
-                client.print(F("<option value='"));
+                bufferedprint(client, PSTR("<option value='"));
                 client.print(val);
                 uint8_t pps_offset = 0;
                 if (bus.getBusType() == BUS_PPS) pps_offset = 4;
                 if ( ((type == VT_ENUM || type == VT_CUSTOM_ENUM) && num_pvalstr == val) || (type == VT_BIT && (msg[10+(bus.getBusType()*3)+data_len-2+pps_offset] & bitmask) == (val & bitmask)) ) {
-                  client.print(F("' SELECTED>"));
+                  bufferedprint(client, PSTR("' SELECTED>"));
                 } else {
-                  client.print(F("'>"));
+                  bufferedprint(client, PSTR("'>"));
                 }
                 client.print(outBuf);
-                client.println(F("</option>"));
+                bufferedprint(client, PSTR("</option>"));
 
                 while(pgm_read_byte_far(enumstr+c)!=0) c++;
                 c++;
               }
             }
 
-            client.print(F("</select></td><td>"));
+            bufferedprint(client, PSTR("</select></td><td>"));
             if ((flags & FL_RONLY) != FL_RONLY) {
-              client.print(F("<input type=button value='Set' onclick=\"set"));
+              bufferedprint(client, PSTR("<input type=button value='Set' onclick=\"set"));
               if (type == VT_BIT) {
-                client.print(F("bit"));
+                bufferedprint(client, PSTR("bit"));
               }
-              client.print(F("("));
+              bufferedprint(client, PSTR("("));
               client.print(line);
-              client.print(F(")\">"));
+              bufferedprint(client, PSTR(")\">"));
             }
           } else {
-            client.print(F("<input type=text id='value"));
+            bufferedprint(client, PSTR("<input type=text id='value"));
             client.print(line);
-            client.print(F("' VALUE='"));
+            bufferedprint(client, PSTR("' VALUE='"));
 
 /*
             char* colon_pos = strchr(pvalstr,':');
@@ -3914,16 +3923,16 @@ char* query(int line_start  // begin at this line (ProgNr)
               client.print(pvalstr);
             } else {
               if  (pvalstr[2] == '-') {   // do not run strtod on disabled parameters (---)
-                client.print(F("---"));
+                bufferedprint(client, PSTR("---"));
               } else {
                 client.print(strtod(pvalstr, NULL));
               }
             }
-            client.print(F("'></td><td>"));
+            bufferedprint(client, PSTR("'></td><td>"));
             if ((flags & FL_RONLY) != FL_RONLY) {
-              client.print(F("<input type=button value='Set' onclick=\"set("));
+              bufferedprint(client, PSTR("<input type=button value='Set' onclick=\"set("));
               client.print(line);
-              client.print(F(")\">"));
+              bufferedprint(client, PSTR(")\">"));
             }
           }
         }
@@ -5704,7 +5713,7 @@ uint8_t pps_offset = 0;
             bufferedprint(client, br_html);
             for (int i=0; i<15; i++) {
               client.print(query(params[i], params[i], 1));
-              client.print(F(";"));
+              bufferedprint(client, PSTR(";"));
             }
 
             bufferedprint(client, PSTR("<BR><BR>\n"));
@@ -6281,16 +6290,13 @@ uint8_t pps_offset = 0;
           bufferedprint(client, br_html);
           
           bufferedprint(client, PSTR(MENU_TEXT_MAC ": "));
-//          char mac_ascii[18]; / use "buffer"??
-//          sprintf(mac_ascii, "%02x:%02x:%02x:%02x:%02x:%02x",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
-//          client.print(mac_ascii);
           
           for (int i=0; i<=5; i++) {
             if (mac[i] < 10) {
-              client.print(F("0"));
+              bufferedprint(client, PSTR("0"));
             }
             client.print(mac[i], HEX);
-            if(i != 5) client.print(F(":"));
+            if(i != 5) bufferedprint(client, PSTR(":"));
           }
           bufferedprint(client, br_html);//client.println(F("<br>"));
 
@@ -6312,66 +6318,58 @@ uint8_t pps_offset = 0;
          bufferedprint(client, br_html);
 
           #ifdef LOGGER
-          client.println(F(MENU_TEXT_LGP " "));
+          bufferedprint(client, PSTR(MENU_TEXT_LGP " "));
           client.print(log_interval);
-          client.println(F(" " MENU_TEXT_SEC ": <BR>"));
+          bufferedprint(client, PSTR(" " MENU_TEXT_SEC ": <BR>"));
           for (int i=0; i<numLogValues; i++) {
             if (log_parameters[i] > 0) {
               client.print (log_parameters[i]);
-              client.print(F(" - "));
+              bufferedprint(client, PSTR(" - "));
               if (log_parameters[i] < 20000) {
                 client.print(lookup_descr(log_parameters[i]));
               } else {
                 if (log_parameters[i] == 20000) {
-                  client.print(F(MENU_TEXT_BZ1));
+                  bufferedprint(client, PSTR(MENU_TEXT_BZ1));
                 }
                 if (log_parameters[i] == 20001) {
-                  client.print(F(MENU_TEXT_BT1));
+                  bufferedprint(client, PSTR(MENU_TEXT_BT1));
                 }
                 if (log_parameters[i] == 20002) {
-                  client.print(F(MENU_TEXT_BZ2));
+                  bufferedprint(client, PSTR(MENU_TEXT_BZ2));
                 }
                 if (log_parameters[i] == 20003) {
-                  client.print(F(MENU_TEXT_BT2));
+                  bufferedprint(client, PSTR(MENU_TEXT_BT2));
                 }
                 if (log_parameters[i] == 20004) {
-                  client.print(F(MENU_TEXT_TZ1));
+                  bufferedprint(client, PSTR(MENU_TEXT_TZ1));
                 }
                 if (log_parameters[i] == 20005) {
-                  client.print(F(MENU_TEXT_TT1));
+                  bufferedprint(client, PSTR(MENU_TEXT_TT1));
                 }
                 if (log_parameters[i] == 20006) {
-                  client.println(F(MENU_TEXT_24A));
+                  bufferedprint(client, PSTR(MENU_TEXT_24A));
                 }
                 if (log_parameters[i] == 20007) {
-                  client.print(F(MENU_TEXT_MXI));
+                  bufferedprint(client, PSTR(MENU_TEXT_MXI));
                 }
                 if (log_parameters[i] == 20008) {
-                  client.print(F(MENU_TEXT_MXS));
+                  bufferedprint(client, PSTR(MENU_TEXT_MXS));
                 }
                 if (log_parameters[i] == 20009) {
-                  client.print(F(MENU_TEXT_MXV));
+                  bufferedprint(client, PSTR(MENU_TEXT_MXV));
                 }
                 if (log_parameters[i] >= 20100 && log_parameters[i] < 20200) {
-                  client.print(F(MENU_TEXT_SN2));
+                  bufferedprint(client, PSTR(MENU_TEXT_SN2));
                 }
                 if (log_parameters[i] >= 20200 && log_parameters[i] < 20300) {
-                  client.print(F(MENU_TEXT_SN1));
+                  bufferedprint(client, PSTR(MENU_TEXT_SN1));
                 }
                 if (log_parameters[i] == 30000) {
-                  client.println(F(MENU_TEXT_BDT "<BR>"));
-                  client.println(F(MENU_TEXT_BUT ": "));
-                  if (log_unknown_only) {
-                    client.println(F(MENU_TEXT_YES "<BR>"));
-                  } else {
-                    client.println(F(MENU_TEXT_NO "<BR>"));
-                  }
-                  client.println(F(MENU_TEXT_LBO ": "));
-                  if (log_bc_only) {
-                    client.println(F(MENU_TEXT_YES "<BR>"));
-                  } else {
-                    client.println(F(MENU_TEXT_NO "<BR>"));
-                  }
+                  bufferedprint(client, PSTR(MENU_TEXT_BDT "<BR>"));
+                  bufferedprint(client, PSTR(MENU_TEXT_BUT ": "));
+                  webPrintYesNo(log_unknown_only);
+                  bufferedprint(client, PSTR(MENU_TEXT_LBO ": "));
+                  webPrintYesNo(log_bc_only);
                 }
               }
               bufferedprint(client, br_html);//client.println(F("<br>"));
@@ -6404,11 +6402,7 @@ uint8_t pps_offset = 0;
           }
           webPrintHeader();
           bufferedprint(client, PSTR(MENU_TEXT_LBO ": "));
-          if (log_bc_only) {
-            bufferedprint(client, PSTR(MENU_TEXT_YES "<BR>"));
-          } else {
-            bufferedprint(client, PSTR(MENU_TEXT_NO "<BR>"));
-          }
+          webPrintYesNo(log_bc_only);
           webPrintFooter();
           break;
         }
@@ -6420,11 +6414,7 @@ uint8_t pps_offset = 0;
           }
           webPrintHeader();
           bufferedprint(client, PSTR(MENU_TEXT_BUT ": "));
-          if (log_unknown_only) {
-            bufferedprint(client, PSTR(MENU_TEXT_YES "<BR>"));
-          } else {
-            bufferedprint(client, PSTR(MENU_TEXT_NO "<BR>"));
-          }
+          webPrintYesNo(log_unknown_only);
           webPrintFooter();
           break;
         }
