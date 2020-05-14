@@ -6555,29 +6555,29 @@ uint8_t pps_offset = 0;
                   max_id[y] = pgm_read_byte_far(pgm_get_far_address(max_device_list)+(x*10)+y);
                 }
                 max_id[10] = '\0';
-                bufferedprint(client, td_tr_open_html);//client.print(F("<tr><td>"));
+                bufferedprint(client, PSTR("<tr><td>"));
                 client.print(max_id);
-                client.print(F(" ("));
+                bufferedprint(client, PSTR(" ("));
                 client.print(max_devices[x], HEX);
-                client.print(F("): "));
+                bufferedprint(client, PSTR("): "));
                 client.print((float)max_cur_temp[x] / 10);
-                client.print(F(" / "));
+                bufferedprint(client, PSTR(" / "));
                 client.print((float)max_dst_temp[x] / 2);
                 if (max_valve[x] > -1) {
-                  client.print(F(" ("));
+                  bufferedprint(client, PSTR(" ("));
                   client.print(max_valve[x]);
-                  client.print(F("%)"));
+                  bufferedprint(client, PSTR("%)"));
                 }
                 bufferedprint(client, td_tr_close_html);
               }
             }
             if (max_avg_count > 0) {
               bufferedprint(client, td_tr_open_html);
-              client.print(F("AvgMax: "));
+              bufferedprint(client, PSTR("AvgMax: "));
               client.print(max_avg / max_avg_count);
               bufferedprint(client, td_tr_close_html);
             } else {
-              client.println(F("<tr><td>" MENU_TEXT_MXN "</td></tr>"));
+              bufferedprint(client, PSTR("<tr><td>" MENU_TEXT_MXN "</td></tr>"));
             }
 #endif
           }else if(range[0]=='A') { // handle average command
@@ -6611,7 +6611,7 @@ uint8_t pps_offset = 0;
             } else {
               for (int i=0; i<numAverages; i++) {
                 if (avg_parameters[i] > 0) {
-                  bufferedprint(client, td_tr_open_html);
+                  bufferedprint(client, PSTR("<tr><td>\n"));
                   client.print(avg_parameters[i]);
                   bufferedprint(client, PSTR(" Avg"));
                   client.print(lookup_descr(avg_parameters[i]));
