@@ -84,7 +84,7 @@ static const int fixed_device_variant = 0;
 //#define DHT_BUS 2,3
 
 // Create 24h averages from these parameters
-int avg_parameters[20] = {
+unsigned int avg_parameters[20] = {
   8700,                   // Außentemperatur
   8326                    // Brenner-Modulation
 };
