@@ -1340,11 +1340,13 @@ void bufferedprintln(PGM_P outstr){
   client.print(buffer);
 }
 
-#ifdef PASSKEY
+
 void printPassKey(void){
+  #ifdef PASSKEY
   bufferedprint(PSTR(PASSKEY "/"));
+  #endif
 }
-#endif
+
 /** *****************************************************************
  *  Function: printyesno
  *  Does: print HTML yes or no
@@ -1358,9 +1360,9 @@ void printPassKey(void){
  * *************************************************************** */
 void printyesno(boolean i){
   if (i) {
-    bufferedprintln(PSTR(MENU_TEXT_YES "<BR>"));
+    bufferedprint(PSTR(MENU_TEXT_YES "<BR>"));
   } else {
-    bufferedprintln(PSTR(MENU_TEXT_NO "<BR>"));
+    bufferedprint(PSTR(MENU_TEXT_NO "<BR>"));
   }
 }
 
@@ -2588,20 +2590,14 @@ void webPrintHeader(void){
   printPStr(pgm_get_far_address(header_html), sizeof(header_html));
 #endif
 
-#ifdef PASSKEY
-printPassKey();
-#endif
+  printPassKey();
   bufferedprint(PSTR("'>BSB-LAN Web</A></h1></center><table width=80% align=center><tr bgcolor=#f0f0f0><td width=20% align=center><a href='/"));
   
-#ifdef PASSKEY
-printPassKey();
-#endif
+  printPassKey();
   bufferedprint(PSTR("K'>" MENU_TEXT_HFK "</a></td><td width=20% align=center><a href='/"));
   //bufferedprint(PSTR("<td width=20% align=center><a href='/"));
   
-#ifdef PASSKEY
-printPassKey();
-#endif
+  printPassKey();
   bufferedprint(PSTR("T'>" MENU_TEXT_SNS "</a></td><td width=20% align=center>"));
   //bufferedprint(PSTR("<td width=20% align=center>"));
 
@@ -2610,25 +2606,19 @@ printPassKey();
 #else
   bufferedprint(PSTR("<a href='/"));
   
-#ifdef PASSKEY
-printPassKey();
-#endif
+  printPassKey();
   bufferedprint(PSTR("DG'>" MENU_TEXT_SLG "</a>"));
 #endif
 
   bufferedprint(PSTR("</td><td width=20% align=center><a href='/"));
 
-#ifdef PASSKEY
-printPassKey();
-#endif
+  printPassKey();
   bufferedprint(PSTR("Q'>" MENU_TEXT_CHK "</a>"));
 
   bufferedprint(td_tr_close_html);//  bufferedprint(PSTR("</td></tr>"));
   bufferedprint(PSTR("<tr bgcolor=#f0f0f0><td width=20% align=center><a href='/"));
   
-#ifdef PASSKEY
-printPassKey();
-#endif
+  printPassKey();
   bufferedprint(PSTR("C'>" MENU_TEXT_CFG "</a></td>"));
   bufferedprint(PSTR("<td width=20% align=center><a href='" MENU_LINK_URL "' target='_new'>" MENU_TEXT_URL "</a></td>"));
   bufferedprint(PSTR("<td width=20% align=center><a href='" MENU_LINK_TOC "' target='new'>" MENU_TEXT_TOC "</a></td>"));
@@ -2724,14 +2714,6 @@ void webPrintSite() {
 
   webPrintFooter();
 } // --- webPrintSite() ---
-
-/** *****************************************************************
- *  Function:  webPrintChoice()
- *  Does:      prints text string to web client
- * *************************************************************** */
-void webPrintYesNo (boolean isTrue) {
-  bufferedprint(isTrue ? PSTR((MENU_TEXT_YES "<BR>")) : PSTR(MENU_TEXT_NO "<BR>"));
-}
  
 
 /** *****************************************************************
@@ -5467,13 +5449,9 @@ uint8_t pps_offset = 0;
 //          memcpy_P(buffer, &ENUM_CAT,len);
 //          buffer[len]=0;
           bufferedprint(PSTR("<table><tr><td><a href='/"));
-          #ifdef PASSKEY
-            printPassKey();
-          #endif
+          printPassKey();
           bufferedprint(PSTR("B'>" MENU_TEXT_BST "</A><BR></td><td></td></tr>\n<tr><td><a href='/"));
-          #ifdef PASSKEY
-            printPassKey();
-          #endif
+          printPassKey();
           bufferedprint(PSTR("A'>" MENU_TEXT_24A "</a></td><td></td></tr>"));
           bufferedprint(PSTR("<tr><td>&nbsp;</td><td>&nbsp;</td></tr>\n"));
           #define K_FORMAT_TBL "<tr><td><a href='K%u'>%s</a></td><td>%d - %d</td></tr>\n"
@@ -5592,8 +5570,7 @@ uint8_t pps_offset = 0;
 
           bufferedprint(MENU_VER);
           //bufferedprint(BSB_VERSION);
-          bufferedprint(br_html);
-          bufferedprint(PSTR(MENU_TEXT_QSC "...<BR>"));
+          bufferedprint(PSTR("<BR>" MENU_TEXT_QSC "...<BR>"));
           if (bus.getBusType() == BUS_BSB) {
             bus.setBusType(BUS_BSB, myAddr, 0x7F);
           }
@@ -6319,17 +6296,15 @@ uint8_t pps_offset = 0;
 
           bufferedprint(MENU_VER);//client.print(F(MENU_TEXT_VER ": "));
           //bufferedprint(BSB_VERSION);
-          bufferedprint(br_html);
-          bufferedprint(PSTR(MENU_TEXT_RAM ": "));
+          bufferedprint(PSTR("<BR>" MENU_TEXT_RAM ": "));
           client.print(freeRam());
           bufferedprint(PSTR(" Bytes <BR>"));
           bufferedprint(PSTR(MENU_TEXT_UPT ": "));
           client.print(millis());
-          bufferedprint(br_html);
 
           myAddr = bus.getBusAddr();
           destAddr = bus.getBusDest();
-          bufferedprint(PSTR(MENU_TEXT_BUS ": "));
+          bufferedprint(PSTR("<BR>" MENU_TEXT_BUS ": "));
           switch (bus.getBusType()) {
             case 0: bufferedprint(PSTR("BSB")); break;
             case 1: bufferedprint(PSTR("LPB")); break;
@@ -6357,28 +6332,24 @@ uint8_t pps_offset = 0;
           client.println(monitor);
           bufferedprint(PSTR("<BR>" MENU_TEXT_VBL ": "));
           client.print(verbose);
-          bufferedprint(br_html);
           
           #ifdef ONE_WIRE_BUS
-          bufferedprint(PSTR(MENU_TEXT_OWP ": "));
+          bufferedprint(PSTR("<BR>" MENU_TEXT_OWP ": "));
           client.println(ONE_WIRE_BUS);
-          bufferedprint(br_html);
           #endif
 
           #ifdef DHT_BUS
-          bufferedprint(PSTR(MENU_TEXT_DHP ": "));
+          bufferedprint(PSTR("<BR>" MENU_TEXT_DHP ": "));
           client.println(DHT_BUS);
-          bufferedprint(br_html);
           #endif
 
-          bufferedprint(PSTR(MENU_TEXT_EXP ": "));
+          bufferedprint(PSTR("<BR>" MENU_TEXT_EXP ": "));
           for (int i=0; i<anz_ex_gpio; i++) {
             client.print(exclude_GPIO[i]);
             bufferedprint(PSTR(" "));
           }
-          bufferedprint(br_html);
           
-          bufferedprint(PSTR(MENU_TEXT_MAC ": "));
+          bufferedprint(PSTR("<BR>" MENU_TEXT_MAC ": "));
           
           for (int i=0; i<=5; i++) {
             if (mac[i] < 10) {
@@ -6453,9 +6424,9 @@ uint8_t pps_offset = 0;
                 }
                 if (log_parameters[i] == 30000) {
                   bufferedprint(PSTR(MENU_TEXT_BDT "<BR>" MENU_TEXT_BUT ": "));
-                  webPrintYesNo(log_unknown_only);
+                  printyesno(log_unknown_only);
                   bufferedprint(PSTR(MENU_TEXT_LBO ": "));
-                  webPrintYesNo(log_bc_only);
+                  printyesno(log_bc_only);
                 }
               }
               bufferedprint(br_html);//client.println(F("<br>"));
@@ -6819,7 +6790,7 @@ uint8_t pps_offset = 0;
               client.print(TWW_duration);
               bufferedprint(PSTR("</td></tr><tr><td>\nTWW Takte: "));
               client.print(TWW_count);
-              bufferedprintln(PSTR("</td></tr>"));
+              bufferedprint(PSTR("</td></tr>"));
             }
           }else{
             if(range[0]=='K'){
