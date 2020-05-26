@@ -6384,7 +6384,11 @@ uint8_t pps_offset = 0;
 
           #ifdef DHT_BUS
           bufferedprint(PSTR("<BR>" MENU_TEXT_DHP ": "));
-          client.println(DHT_BUS);
+          static const uint8_t numDHTSensors = sizeof(DHT_Pins) / sizeof(uint8_t);
+          for (uint8_t i=0; i<numDHTSensors; i++) {
+            client.print(DHT_Pins[i]);
+            bufferedprint(PSTR(", "));
+          }
           #endif
 
           bufferedprint(PSTR("<BR>" MENU_TEXT_EXP ": "));
