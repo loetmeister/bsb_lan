@@ -5892,13 +5892,13 @@ uint8_t pps_offset = 0;
                           client.println(F("<br>"));
                         }
                         for (int i=0;i<tx_msg[bus.getLen_idx()]+bus.getBusType();i++) {
-                          if (tx_msg[i] < 16) bufferedprint(PSTR("0"));  // add a leading zero to single-digit values
+                          if (tx_msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
                           client.print(tx_msg[i], HEX);
                           client.print(F(" "));
                         }
                         client.println(F("<br>"));
                         for (int i=0;i<msg[bus.getLen_idx()]+bus.getBusType();i++) {
-                          if (msg[i] < 16) bufferedprint(PSTR("0"));  // add a leading zero to single-digit values
+                          if (msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
                           client.print(msg[i], HEX);
                           client.print(F(" "));
                         }
@@ -5941,14 +5941,14 @@ uint8_t pps_offset = 0;
             client.println(F("<br>"));
           }
           for (int i=0;i<tx_msg[bus.getLen_idx()]+bus.getBusType();i++) {
-            if (tx_msg[i] < 16) bufferedprint(PSTR("0"));  // add a leading zero to single-digit values
+            if (tx_msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
             client.print(tx_msg[i], HEX);
             client.print(F(" "));
           }
           client.println();
           client.println(F("<br>"));
           for (int i=0;i<msg[bus.getLen_idx()]+bus.getBusType();i++) {
-            if (msg[i] < 16) bufferedprint(PSTR("0"));  // add a leading zero to single-digit values
+            if (msg[i] < 16) client.print(F("0"));  // add a leading zero to single-digit values
             client.print(msg[i], HEX);
             client.print(F(" "));
           }
