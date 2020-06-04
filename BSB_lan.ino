@@ -7416,7 +7416,7 @@ if(SD.vol()->freeClusterCount() >= MINIMUM_FREE_SPACE_ON_SD) {
       avgfile.println(avgCounter);
       avgfile.close();
     }
-
+}
 #endif
 
 #ifdef WATCH_SOCKETS
@@ -7426,7 +7426,6 @@ if(SD.vol()->freeClusterCount() >= MINIMUM_FREE_SPACE_ON_SD) {
 
 // while we are here, update date/time as well...
 //    SetDateTime();
-  }
 // end calculate averages
 
 #ifdef CUSTOM_COMMANDS
