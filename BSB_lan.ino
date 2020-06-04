@@ -7364,9 +7364,9 @@ if(SD.vol()->freeClusterCount() >= MINIMUM_FREE_SPACE_ON_SD) {
         }
       }
     }
-  }
     avgCounter++;
     lastAvgTime += 60000;
+  }
 
 #ifdef LOGGER
 
