@@ -4345,59 +4345,26 @@ void Ipwe() {
   }
 
 #if defined(ONE_WIRE_BUS) || defined(DHT_BUS)
-  char *formatbuf = (char *)malloc(100);
+  char *formatbuf = (char *)malloc(146);
 #endif
 #ifdef ONE_WIRE_BUS
   // output of one wire sensors
   sensors.requestTemperatures();
   DeviceAddress device_address;
 
-  strcpy_P(formatbuf, PSTR("<tr><td>T<br></td><td>%u<br></td><td>%02x%02x%02x%02x%02x%02x%02x%02x<br></td><td>"));
+  strcpy_P(formatbuf, PSTR("<tr><td>T<br></td><td>%u<br></td><td>%02x%02x%02x%02x%02x%02x%02x%02x<br></td><td>%s<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
   for(uint8_t i=0;i<numSensors;i++) {
     counter++;
     outBufclear();
     float t=sensors.getTempCByIndex(i);
     sensors.getAddress(device_address, i);
-    outBufLen+=sprintf(outBuf, formatbuf, counter, device_address[0],device_address[1],device_address[2],device_address[3],device_address[4],device_address[5],device_address[6],device_address[7]);
-    _printFIXPOINT(t,2);
-    strcat_P(outBuf, PSTR("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
+    char temp_string[7];
+    _printFIXPOINT(temp_string, t, 2);
+    outBufLen+=sprintf(outBuf, formatbuf, counter, device_address[0],device_address[1],device_address[2],device_address[3],device_address[4],device_address[5],device_address[6],device_address[7], temp_string);
     client.println(outBuf);
   }
 #endif
 
-/*#ifdef DHT_BUS // TODO: Reduce code for this part... use old "style" below in the meantime
-  // output of DHT sensors
-  static const uint8_t numDHTSensors = sizeof(DHT_Pins) / sizeof(uint8_t);
-  strcpy_P(formatbuf, PSTR("<tr><td>%<br></td><td>%u<br></td><td>DHT sensor %u<br></td><td>"));
-  const char typeF[] = "F";
-  const char typeT[] = "T";
-  
-  for(int i=0;i<numDHTSensors;i++){
-    DHT.read22(DHT_Pins[i]);
-    float hum = DHT.humidity;
-    float temp = DHT.temperature;
-    
-    if (hum > 0 && hum < 101) {
-      counter++;
-      outBufclear();
-      outBufLen+=sprintf(outBuf, formatbuf, typeT, counter, i+1);
-      _printFIXPOINT(temp,2);
-      strcat_P(outBuf, PSTR("<br></td><td>"));
-      //_printFIXPOINT(hum,0);
-      //strcat_P(outBuf, PSTR("<br></td><td>0<br></td><td>0<br></td></tr>"));
-      strcat_P(outBuf, PSTR("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
-      client.println(outBuf);
-
-      counter++;
-      outBufclear();
-      outBufLen+=sprintf(outBuf, formatbuf, typeF, counter, i+1);
-      strcat_P(outBuf, PSTR("0<br></td><td>"));
-      _printFIXPOINT(hum,0);
-      strcat_P(outBuf, PSTR("<br></td><td>0<br></td><td>0<br></td></tr>"));
-      client.println(outBuf);
-    }
-  }
-#endif*/
 #ifdef DHT_BUS
   // output of DHT sensors
   static const uint8_t numDHTSensors = sizeof(DHT_Pins) / sizeof(uint8_t);
@@ -7198,15 +7165,17 @@ uint8_t pps_offset = 0;
 #ifdef ONE_WIRE_BUS
             int log_sensor = log_parameters[i] - 20200;
             float t=sensors.getTempCByIndex(log_sensor);
-            char tmpSign[] = " ";
-            if (t < 0) {
-              tmpSign[0] = '-';
-            }
-            float tmpVal = (t < 0) ? -t : t;
-            int tmpInt1 = tmpVal;
-            float tmpFrac = tmpVal - tmpInt1;
-            int tmpInt2 = trunc(tmpFrac * 100);
-            sprintf (buffer, "%s%d.%02d\n", tmpSign, tmpInt1, tmpInt2);
+//            char tmpSign[] = " ";
+//            if (t < 0) {
+//              tmpSign[0] = '-';
+//            }
+//            float tmpVal = (t < 0) ? -t : t;
+//            int tmpInt1 = tmpVal;
+//            float tmpFrac = tmpVal - tmpInt1;
+//            int tmpInt2 = trunc(tmpFrac * 100);
+//            sprintf (buffer, "%s%d.%02d\n", tmpSign, tmpInt1, tmpInt2);
+            _printFIXPOINT(buffer, t, 2);
+            strcat_P(buffer, PSTR("\n"));
             MQTTClient.publish(MQTTTopic.c_str(), buffer);
 #endif
           }
