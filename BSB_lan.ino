@@ -4143,6 +4143,41 @@ void SetDateTime(){
 }
 
 #ifdef DHT_BUS
+/** *****************************************************************
+ *  Function:  DHT_read_sensor()
+ *  Does:      Reads a DHT sensor
+ *  Pass parameters:
+ *   pointer to temperature and humidity
+ *  Function value returned:
+ *   result code
+ * *************************************************************** */
+int DHT_read_sensor(uint8_t pin, float *temp, float *hum) {
+#ifdef DHT_TYPE11
+  int chk = DHT.read11(pin);  // DHT11 & DHT12
+#else
+  int chk = DHT.read(pin);  // DHT22 and others
+#endif
+  
+  *hum = DHT.humidity;
+  *temp = DHT.temperature;
+
+  DebugOutput.print(F("DHT, "));  
+  switch (chk) {
+    case DHTLIB_OK:
+    DebugOutput.println(F("OK"));
+    break;
+    case DHTLIB_ERROR_CHECKSUM:
+    DebugOutput.println(F("Checksum error"));
+    break;
+    case DHTLIB_ERROR_TIMEOUT:
+    DebugOutput.println(F("Timeout error"));
+    break;
+    default:
+    DebugOutput.println(F("Unknown error"));
+    break;
+  }
+  return chk;
+}
 
 /** *****************************************************************
  *  Function:  dht22()
@@ -4163,30 +4198,14 @@ void SetDateTime(){
 void dht22(void) {
   int i;
   static const uint8_t numDHTSensors = sizeof(DHT_Pins) / sizeof(uint8_t);
-  DebugOutput.print(F("DHT22 sensors: "));
+  DebugOutput.print(F("DHT sensors: "));
   DebugOutput.println(numDHTSensors);
   outBufclear();
+  float hum, temp;
   
   for(i=0;i<numDHTSensors;i++) {
-    int chk = DHT.read22(DHT_Pins[i]);
-    switch (chk) {
-      case DHTLIB_OK:
-      DebugOutput.print(F("OK,\t"));
-      break;
-      case DHTLIB_ERROR_CHECKSUM:
-      DebugOutput.print(F("Checksum error,\t"));
-      break;
-      case DHTLIB_ERROR_TIMEOUT:
-      DebugOutput.print(F("Time out error,\t"));
-      break;
-      default:
-      DebugOutput.print(F("Unknown error,\t"));
-      break;
-    }
-
-    float hum = DHT.humidity;
-    float temp = DHT.temperature;
-
+    
+    DHT_read_sensor(DHT_Pins[i], &temp, &hum);
     if (hum > 0 && hum < 101) {
       DebugOutput.print(F("#dht_temp["));
       DebugOutput.print(i);
@@ -4352,11 +4371,10 @@ void Ipwe() {
 #ifdef DHT_BUS
   // output of DHT sensors
   static const uint8_t numDHTSensors = sizeof(DHT_Pins) / sizeof(uint8_t);
+  float hum, temp;
   
   for(int i=0;i<numDHTSensors;i++){
-    DHT.read22(DHT_Pins[i]);
-    float hum = DHT.humidity;
-    float temp = DHT.temperature;
+    DHT_read_sensor(DHT_Pins[i], &temp, &hum);
 
     if (hum > 0 && hum < 101) {
       counter++;
@@ -7108,25 +7126,10 @@ uint8_t pps_offset = 0;
           if (log_parameters[i] >= 20100 && log_parameters[i] < 20200) {
 #ifdef DHT_BUS
             int log_sensor = log_parameters[i] - 20100;
-            int chk = DHT.read22(DHT_Pins[log_sensor]);
-            DebugOutput.println(chk);
-            float hum = DHT.humidity;
-            float temp = DHT.temperature;
+            float hum, temp;
+            DHT_read_sensor(DHT_Pins[log_sensor], &temp, &hum);
+
             if (hum > 0 && hum < 101) {
-//              char tmpSign[] = " ";
-//              if (temp < 0) {
-//                tmpSign[0] = '-';
-//              }
-//              float tmpVal = (temp < 0) ? -temp : temp;
-//              int tmpInt1 = tmpVal;
-//              float tmpFrac = tmpVal - tmpInt1;
-//              int tmpInt2 = trunc(tmpFrac * 100);
-//
-//              float tmpVal2 = (hum < 0) ? -hum : hum;
-//              int tmpInt3 = tmpVal2;
-//              float tmpFrac2 = tmpVal2 - tmpInt3;
-//              int tmpInt4 = trunc(tmpFrac2 * 100);
-//              sprintf (buffer, "%s%d.%02d / %d.%02d", tmpSign, tmpInt1, tmpInt2, tmpInt3, tmpInt4);
               int len = _printFIXPOINT(buffer, temp, 2);
               strcat_P(buffer, PSTR(" / "));
               _printFIXPOINT(buffer+len, hum, 2);
@@ -7138,15 +7141,6 @@ uint8_t pps_offset = 0;
 #ifdef ONE_WIRE_BUS
             int log_sensor = log_parameters[i] - 20200;
             float t=sensors.getTempCByIndex(log_sensor);
-//            char tmpSign[] = " ";
-//            if (t < 0) {
-//              tmpSign[0] = '-';
-//            }
-//            float tmpVal = (t < 0) ? -t : t;
-//            int tmpInt1 = tmpVal;
-//            float tmpFrac = tmpVal - tmpInt1;
-//            int tmpInt2 = trunc(tmpFrac * 100);
-//            sprintf (buffer, "%s%d.%02d\n", tmpSign, tmpInt1, tmpInt2);
             _printFIXPOINT(buffer, t, 2);
             strcat_P(buffer, PSTR("\n"));
             MQTTClient.publish(MQTTTopic.c_str(), buffer);
@@ -7272,10 +7266,8 @@ if(SD.vol()->freeClusterCount() >= MINIMUM_FREE_SPACE_ON_SD) {
 #ifdef DHT_BUS
           if (log_parameters[i] >= 20100 && log_parameters[i] < 20200) {
             int log_sensor = log_parameters[i] - 20100;
-            int chk = DHT.read22(DHT_Pins[log_sensor]);
-            DebugOutput.println(chk);
-            float hum = DHT.humidity;
-            float temp = DHT.temperature;
+            float hum, temp;
+            DHT_read_sensor(DHT_Pins[log_sensor], &temp, &hum);
             if (hum > 0 && hum < 101) {
               dataFile.print(F("DHT Temperature "));
               dataFile.print(log_sensor);
@@ -7596,7 +7588,7 @@ void setup() {
   // The computer hardware serial interface #0:
   //   115,800 bps, 8 data bits, no parity
   Serial.begin(115200, SERIAL_8N1); // hardware serial interface #0
-  Serial.println(F("READY, " BSB_VERSION));
+  Serial.println(F("READY"));
  #ifdef DebugTelnet
   Serial.println(F("Logging to Telnet"));
  #endif
