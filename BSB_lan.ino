@@ -7600,7 +7600,7 @@ void setup() {
   Serial.begin(115200, SERIAL_8N1); // hardware serial interface #0
   Serial.println(F("READY"));
  #ifdef DebugTelnet
-  Serial.println(F("Logging output to Telnet"));
+  Serial.println(F("Logging to Telnet"));
  #endif
   DebugOutput.print(F("Size of cmdtbl1: "));
   DebugOutput.println(sizeof(cmdtbl1));
