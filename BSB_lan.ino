@@ -3813,14 +3813,15 @@ char* query(int line_start  // begin at this line (ProgNr)
                 LogTelegram(tx_msg);
 #endif
               }
-
+#ifndef NO_SERIAL_INPUT
               // Decode the rcv telegram and send it to the PC serial interface
               pvalstr=printTelegram(msg, line);
-              DebugOutput.print(F("#"));
-              DebugOutput.print(line);
-              DebugOutput.print(F(": "));
-              DebugOutput.println(pvalstr);
-              DebugOutput.flush();
+              Serial.print(F("#"));
+              Serial.print(line);
+              Serial.print(F(": "));
+              Serial.println(pvalstr);
+              Serial.flush();
+#endif
 #ifdef LOGGER
               LogTelegram(msg);
 #endif
@@ -3865,12 +3866,14 @@ char* query(int line_start  // begin at this line (ProgNr)
           msg[8] = c & 0xFF;
 */
           pvalstr = printTelegram(msg, line);
-
-          DebugOutput.print(F("#"));
-          DebugOutput.print(line);
-          DebugOutput.print(F(": "));
-          DebugOutput.println(pvalstr);
-          DebugOutput.flush();
+          
+#ifndef NO_SERIAL_INPUT
+          Serial.print(F("#"));
+          Serial.print(line);
+          Serial.print(F(": "));
+          Serial.println(pvalstr);
+          Serial.flush();
+#endif
         }
       }else{
         //DebugOutput.println(F("unknown command"));
@@ -4161,19 +4164,19 @@ int DHT_read_sensor(uint8_t pin, float *temp, float *hum) {
   *hum = DHT.humidity;
   *temp = DHT.temperature;
 
-  DebugOutput.print(F("DHT, "));  
+  DebugOutput.print(F("DHT, "));
   switch (chk) {
     case DHTLIB_OK:
-    DebugOutput.println(F("OK"));
+      DebugOutput.println(F("OK"));
     break;
     case DHTLIB_ERROR_CHECKSUM:
-    DebugOutput.println(F("Checksum error"));
+      DebugOutput.println(F("Checksum error"));
     break;
     case DHTLIB_ERROR_TIMEOUT:
-    DebugOutput.println(F("Timeout error"));
+      DebugOutput.println(F("Timeout error"));
     break;
     default:
-    DebugOutput.println(F("Unknown error"));
+      DebugOutput.println(F("Unknown error"));
     break;
   }
   return chk;
@@ -4207,15 +4210,16 @@ void dht22(void) {
     
     DHT_read_sensor(DHT_Pins[i], &temp, &hum);
     if (hum > 0 && hum < 101) {
-      DebugOutput.print(F("#dht_temp["));
-      DebugOutput.print(i);
-      DebugOutput.print(F("]: "));
-      DebugOutput.print(temp);
-      DebugOutput.print(F(", hum["));
-      DebugOutput.print(i);
-      DebugOutput.print(F("]: "));
-      DebugOutput.println(hum);
-      
+#ifndef NO_SERIAL_INPUT
+      Serial.print(F("#dht_temp["));
+      Serial.print(i);
+      Serial.print(F("]: "));
+      Serial.print(temp);
+      Serial.print(F(", hum["));
+      Serial.print(i);
+      Serial.print(F("]: "));
+      Serial.println(hum);
+#endif
       outBufLen+=sprintf(outBuf+outBufLen,"<tr><td>\ntemp[%d]: ",i);
       outBufLen+=_printFIXPOINT(outBuf+outBufLen,temp,2);
       outBufLen+=sprintf(outBuf+outBufLen," &deg;C\n</td></tr>\n<tr><td>\n");
@@ -4258,12 +4262,14 @@ void ds18b20(void) {
   for(i=0;i<numSensors;i++){
     outBufclear();
     float t=sensors.getTempCByIndex(i);
-    DebugOutput.print(F("#1w_temp["));
-    DebugOutput.print(i);
-    DebugOutput.print(F("]: "));
-    DebugOutput.print(t);
-    DebugOutput.println();
-
+    
+#ifndef NO_SERIAL_INPUT
+    Serial.print(F("#1w_temp["));
+    Serial.print(i);
+    Serial.print(F("]: "));
+    Serial.print(t);
+    Serial.println();
+#endif
     sensors.getAddress(device_address, i);
 //    sprintf(device_ascii, "%02x%02x%02x%02x%02x%02x%02x%02x",device_address[0],device_address[1],device_address[2],device_address[3],device_address[4],device_address[5],device_address[6],device_address[7]);
 //    outBufLen+=sprintf(outBuf+outBufLen,"<tr><td>\n1w_temp[%d] %s: ",i, device_ascii);
@@ -4382,7 +4388,7 @@ void Ipwe() {
       client.print(counter);
       bufferedprint(PSTR("<br></td><td>DHT sensor "));
       client.print(i+1);
-      bufferedprint(PSTR(" temperature<br></td><td>"));
+      bufferedprint(PSTR("<br></td><td>"));
       client.print(temp);
       bufferedprint(PSTR("<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
       counter++;
@@ -4390,7 +4396,7 @@ void Ipwe() {
       client.print(counter);
       bufferedprint(PSTR("<br></td><td>DHT sensor "));
       client.print(i+1);
-      bufferedprint(PSTR(" humidity<br></td><td>0<br></td><td>"));
+      bufferedprint(PSTR("<br></td><td>0<br></td><td>"));
       client.print(hum);
       bufferedprint(PSTR("<br></td><td>0<br></td><td>0<br></td></tr>"));
     }
@@ -5177,6 +5183,7 @@ uint8_t pps_offset = 0;
           DebugOutput.print(c);         // and send it to hardware UART
         }
         if (Serial.available()) {
+#ifndef NO_SERIAL_INPUT
           c = Serial.read();
           DebugOutput.print(c);         // and send it to hardware UART
           int timeout = 0;
@@ -5188,6 +5195,7 @@ uint8_t pps_offset = 0;
               break;
             }
           }
+#endif
         }
 
         if ((c!='\n') && (c!='\r') && (bPlaceInBuffer<MaxArrayElement)){
@@ -6847,14 +6855,14 @@ uint8_t pps_offset = 0;
                   client.println(decodedTelegram.unit);
 
                   bufferedprint(td_tr_close_html);
-
-                  DebugOutput.print(F("#avg_"));
-                  DebugOutput.print(avg_parameters[i]);
-                  DebugOutput.print(F(": "));
-                  DebugOutput.print(rounded/10);
-                  DebugOutput.print(F(" "));
-                  DebugOutput.println(decodedTelegram.unit);
-
+#ifndef NO_SERIAL_INPUT
+                  Serial.print(F("#avg_"));
+                  Serial.print(avg_parameters[i]);
+                  Serial.print(F(": "));
+                  Serial.print(rounded/10);
+                  Serial.print(F(" "));
+                  Serial.println(decodedTelegram.unit);
+#endif
                 }
               }
             }
@@ -7154,10 +7162,10 @@ uint8_t pps_offset = 0;
     // Close the json doc off
     MQTTPayload.concat(F("}}"));
       // debugging..
-      Serial.print(F("Output topic: "));
-      Serial.println(MQTTTopic.c_str());
-      Serial.print(F("Payload Output : "));
-      Serial.println(MQTTPayload.c_str());
+      DebugOutput.print(F("Output topic: "));
+      DebugOutput.println(MQTTTopic.c_str());
+      DebugOutput.print(F("Payload Output : "));
+      DebugOutput.println(MQTTPayload.c_str());
     // Now publish the json payload only once
     MQTTClient.publish(MQTTTopic.c_str(), MQTTPayload.c_str());
 #endif
