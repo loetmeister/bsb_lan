@@ -495,7 +495,7 @@ uint8_t json_types[20] = { 0 };
   // Pass our oneWire reference to Dallas Temperature.
   DallasTemperature sensors(&oneWire);
 
-  uint8_t numSensors;
+  uint8_t oneWireNumSensors;
 #endif
 
 #ifdef DHT_BUS
@@ -509,15 +509,17 @@ char date[20];
 unsigned long lastAvgTime = millis();
 unsigned long lastLogTime = millis();
 unsigned long lastMQTTTime = millis();
+#ifdef CUSTOM_COMMANDS
 unsigned long custom_timer = millis();
 unsigned long custom_timer_compare = 0;
 float custom_floats[20] = { 0 };
 long custom_longs[20] = { 0 };
+static const int numCustomFloats = sizeof(custom_floats) / sizeof(float);
+static const int numCustomLongs = sizeof(custom_longs) / sizeof(long);
+#endif
 static const int numAverages = sizeof(avg_parameters) / sizeof(int);
 static const int anz_ex_gpio = sizeof(exclude_GPIO) / sizeof(byte);
 static const int numLogValues = sizeof(log_parameters) / sizeof(int);
-static const int numCustomFloats = sizeof(custom_floats) / sizeof(float);
-static const int numCustomLongs = sizeof(custom_longs) / sizeof(long);
 float *avgValues_Old = new float[numAverages];
 float *avgValues = new float[numAverages];
 float *avgValues_Current = new float[numAverages];
@@ -3076,6 +3078,8 @@ void LogTelegram(byte* msg){
     }
   }
 }
+#else
+void LogTelegram(byte* msg){};
 #endif
 
 #define MAX_PARAM_LEN 22
@@ -3719,9 +3723,7 @@ int set(int line      // the ProgNr of the heater parameter
   // Decode the xmit telegram and send it to the PC serial interface
   if(verbose) {
     printTelegram(tx_msg, line);
-#ifdef LOGGER
     LogTelegram(tx_msg);
-#endif
   }
 
   // no answer for TYPE_INF
@@ -3729,9 +3731,7 @@ int set(int line      // the ProgNr of the heater parameter
 
   // Decode the rcv telegram and send it to the PC serial interface
   printTelegram(msg, line);
-#ifdef LOGGER
   LogTelegram(msg);
-#endif
 
   // Expect an acknowledgement to our SET telegram
   if(msg[4+(bus.getBusType()*4)]!=TYPE_ACK){      // msg type at 4 (BSB) or 8 (LPB)
@@ -3809,9 +3809,7 @@ char* query(int line_start  // begin at this line (ProgNr)
               // Decode the xmit telegram and send it to the PC serial interface
               if(verbose) {
                 printTelegram(tx_msg, line);
-#ifdef LOGGER
                 LogTelegram(tx_msg);
-#endif
               }
 #ifndef NO_SERIAL_INPUT
               // Decode the rcv telegram and send it to the PC serial interface
@@ -3822,9 +3820,7 @@ char* query(int line_start  // begin at this line (ProgNr)
               Serial.println(pvalstr);
               Serial.flush();
 #endif
-#ifdef LOGGER
               LogTelegram(msg);
-#endif
               break;   // success, break out of while loop
             }else{
               DebugOutput.print(F("query failed "));
@@ -4247,7 +4243,7 @@ void dht22(void) {
  *  Function value returned:
  *   none
  *  Global resources used:
- *    int numSensors
+ *    uint8_t oneWireNumSensors
  *    outBuf[]
  *    Serial   the hardware serial interface to a PC
  *    sensors  class which handles sensors
@@ -4259,7 +4255,7 @@ void ds18b20(void) {
   sensors.requestTemperatures(); // Send the command to get temperatures
   DeviceAddress device_address;
 //  char device_ascii[17];
-  for(i=0;i<numSensors;i++){
+  for(i=0;i<oneWireNumSensors;i++){
     outBufclear();
     float t=sensors.getTempCByIndex(i);
     
@@ -4312,7 +4308,7 @@ char *lookup_descr(uint16_t line) {
  *  Function value returned:
  *   none
  *  Global resources used:
- *    numSensors
+ *    oneWireNumSensors
  *    client object
  *    led0   output pin 3
  * *************************************************************** */
@@ -4362,7 +4358,7 @@ void Ipwe() {
   DeviceAddress device_address;
 
   strcpy_P(formatbuf, PSTR("<tr><td>T<br></td><td>%u<br></td><td>%02x%02x%02x%02x%02x%02x%02x%02x<br></td><td>%s<br></td><td>0<br></td><td>0<br></td><td>0<br></td></tr>"));
-  for(uint8_t i=0;i<numSensors;i++) {
+  for(uint8_t i=0;i<oneWireNumSensors;i++) {
     counter++;
     outBufclear();
     float t=sensors.getTempCByIndex(i);
@@ -4594,11 +4590,10 @@ void loop() {
   boolean busmsg = false;
   if(monitor){
     busmsg=bus.Monitor(msg);
-#ifdef LOGGER
+
     if (busmsg==true) {
       LogTelegram(msg);
     }
-#endif
 //  }else{
   }
   if (!monitor || busmsg == true) {
@@ -4608,18 +4603,14 @@ void loop() {
        // Decode the rcv telegram and send it to the PC serial interface
       if(verbose && bus.getBusType() != BUS_PPS && !monitor) {  // verbose output for PPS comes later
         printTelegram(msg, -1);
-#ifdef LOGGER
         LogTelegram(msg);
-#endif
       }
       // Is this a broadcast message?
       if(((msg[2]==ADDR_ALL && bus.getBusType()==BUS_BSB) || (msg[2]>=0xF0 && bus.getBusType()==BUS_LPB)) && msg[4+(bus.getBusType()*4)]==TYPE_INF){ // handle broadcast messages
       // Decode the rcv telegram and send it to the PC serial interface
         if (!verbose && !monitor) {        // don't log twice if in verbose mode, but log broadcast messages also in non-verbose mode
           printTelegram(msg, -1);
-#ifdef LOGGER
           LogTelegram(msg);
-#endif
         }
 
         // Filter Brenner Status messages (attention: partially undocumented enum values)
@@ -4928,12 +4919,11 @@ void loop() {
               DebugOutput.print(F(" "));
             }
             printTelegram(tx_msg, -1);
-#ifdef LOGGER
+
             if (!monitor) {
               LogTelegram(msg);
               LogTelegram(tx_msg);
             }
-#endif
           }
 
         } else {    // parse heating system data
@@ -5135,9 +5125,7 @@ uint8_t pps_offset = 0;
 
           if(verbose && !monitor) {     // verbose output for PPS after time-critical sending procedure
             printTelegram(msg, -1);
-#ifdef LOGGER
             LogTelegram(msg);
-#endif
           }
 
         } // End parse PPS heating data
@@ -5714,16 +5702,12 @@ uint8_t pps_offset = 0;
               // Decode the xmit telegram and send it to the PC serial interface
               if(verbose) {
                 printTelegram(tx_msg, line);
-#ifdef LOGGER
                 LogTelegram(tx_msg);
-#endif
               }
 
               // Decode the rcv telegram and send it to the PC serial interface
               printTelegram(msg, line);   // send to hardware serial interface
-#ifdef LOGGER
               LogTelegram(msg);
-#endif
               if(outBufLen>0){
                 client.println(outBuf);
                 bufferedprint(br_html);
@@ -5871,14 +5855,10 @@ uint8_t pps_offset = 0;
                   if (msg[4+(bus.getBusType()*4)]!=TYPE_ERR) {
                     // Decode the xmit telegram and send it to the PC serial interface
                     printTelegram(tx_msg, -1);
-#ifdef LOGGER
                     LogTelegram(tx_msg);
-#endif
                     // Decode the rcv telegram and send it to the PC serial interface
                     pvalstr=printTelegram(msg, -1);   // send to hardware serial interface
-#ifdef LOGGER
                     LogTelegram(msg);
-#endif
                     if (pvalstr[0]<1) {
                       my_dev_fam = temp_dev_fam;
                       my_dev_var = temp_dev_var;
@@ -5929,15 +5909,11 @@ uint8_t pps_offset = 0;
           }else{
             // Decode the xmit telegram and send it to the PC serial interface
             printTelegram(tx_msg, -1);
-#ifdef LOGGER
             LogTelegram(tx_msg);
-#endif
           }
           // Decode the rcv telegram and send it to the PC serial interface
           printTelegram(msg, -1);   // send to hardware serial interface
-#ifdef LOGGER
           LogTelegram(msg);
-#endif
           if(outBufLen>0){
             client.println(outBuf);
             bufferedprint(br_html);
@@ -6758,6 +6734,7 @@ uint8_t pps_offset = 0;
             dht22();
 #endif
           }else if(range[0]=='U'){ // output user-defined custom_array variable
+		  #ifdef CUSTOM_COMMANDS
             for(int i=0;i<numCustomFloats;i++){
               outBufclear();
               outBufLen+=sprintf(outBuf+outBufLen,"<tr><td>\ncustom_float[%d]: ",i);
@@ -6770,6 +6747,7 @@ uint8_t pps_offset = 0;
               outBufLen+=sprintf(outBuf+outBufLen,"<tr><td>\ncustom_long[%d]: %ld\n</td></tr>\n",i, custom_longs[i]);
               client.println(outBuf);
             }
+		  #endif
           }else if(range[0]=='X'){ // handle MAX command
 #ifdef MAX_CUL
             int max_avg_count = 0;
@@ -7578,7 +7556,7 @@ void clientPPrintBR(const char str[]) {
  * Function value returned:
  *  none
  * Global resources used:
- *  numSensors
+ *  oneWireNumSensors
  *  server instance
  *  sensors instance
  *  Serial instance
@@ -7757,9 +7735,9 @@ void setup() {
 #ifdef ONE_WIRE_BUS
   // check ds18b20 sensors
   sensors.begin();
-  numSensors=sensors.getDeviceCount();
-  DebugOutput.print(F("numSensors: "));
-  DebugOutput.println(numSensors);
+  oneWireNumSensors=sensors.getDeviceCount();
+  DebugOutput.print(F("oneWireNumSensors: "));
+  DebugOutput.println(oneWireNumSensors);
 #endif
 
 /*
